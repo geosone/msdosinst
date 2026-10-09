@@ -1,0 +1,23 @@
+                    MS-DOS 7.1 - Lizenzhinweis
+                    ==========================
+
+MS-DOS und Windows sind Software der Microsoft Corporation und
+urheberrechtlich geschützt. Für die Programme auf diesen Disketten
+gelten die Lizenzbedingungen von Microsoft (EULA) des Produkts, aus
+dem sie stammen (z. B. Windows 98 Second Edition).
+
+Sie dürfen diesen Diskettensatz nur verwenden, wenn Sie eine gültige
+Lizenz für dieses Produkt besitzen. Mit "Annehmen" bestätigen Sie,
+dass Sie die Lizenzbedingungen von Microsoft für dieses Produkt
+anerkennen und einhalten.
+
+Der Diskettensatz wurde mit mkdosset.ps1 aus Ihren eigenen Disketten
+erstellt. Er enthält keine Dateien des GeosOne-Projekts außer dem
+Installationsprogramm.
+
+Das Installationsprogramm INSTALL.EXE (GeosOne DOS Installer) ist
+freie Software unter der GNU General Public License Version 3:
+https://github.com/geosone/gdi
+
+Einige Programme auf den Original-Disketten stammen von anderen
+Herstellern (z. B. PKZIP, NDD); für sie gelten deren Bedingungen.

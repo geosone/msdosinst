@@ -1,0 +1,31 @@
+MS-DOS 7.1 - Setup mit dem GeosOne DOS Installer
+================================================
+
+Installation
+------------
+
+1. Vom Setup-Diskette 1 starten. Das Setup startet automatisch.
+2. Gibt es noch kein Laufwerk C:, startet FDISK: eine primäre
+   DOS-Partition anlegen und aktivieren, FDISK verlassen. Der
+   Computer startet neu, das Setup geht weiter.
+3. Ist C: nicht formatiert, formatiert das Setup das Laufwerk.
+4. Das Setup überträgt das System (SYS C:), kopiert MS-DOS nach
+   C:\DOS (die übrigen Disketten werden angefordert) und legt
+   CONFIG.SYS und AUTOEXEC.BAT neu an. Vorhandene Dateien bleiben
+   als CONFIG.G01, AUTOEXEC.G01 erhalten.
+5. Danach können Sie weitere Software installieren: Diskette mit
+   einer INSTALL.INI einlegen (z. B. AHCIASPI, EUSBASPI) und
+   "Installieren" wählen.
+
+Optionen
+--------
+
+  HIMEM.SYS, EMM386.EXE        Speicherverwaltung (EMM386 ohne EMS)
+  Deutsche Tastatur            KEYB GR und COUNTRY=049
+  MS-DOS Shell                 DOSSHELL (VGA)
+  MS-DOS 5.0/6.22-Programme    EDLIN, BACKUP, COMP, MIRROR, ...
+  Zusatzprogramme Windows 95   MEMMAKER, MSBACKUP, INTERLNK, ...
+  AccessDOS, Tastatur-Utilities, DRVBOOT, Netzwerkdateien
+                               von der MS-DOS 6.22-Zusatzdiskette
+
+Erstellt mit mkdosset.ps1: https://github.com/geosone/msdosinst
