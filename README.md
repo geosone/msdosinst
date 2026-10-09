@@ -20,7 +20,7 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux, macOS):
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
     .\mkdosset.ps1 -Source D:\dosfiles -Extra D:\ahciaspi
 
-1. Copy the files of your disks into one folder (subfolders are fine). A file name must not occur twice with different contents: the system files `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM` and `SYS.COM` must be the MS-DOS 7.1 ones (IO.SYS 76036 bytes, from the system disk "W98_de"), not the older ones of DISK1.
+1. Copy the files of your disks into one folder (subfolders are fine). **[FILES.md](FILES.md) lists every file the set needs, with its size and the disk it comes from** (`-List` shows the same). A file name must not occur twice with different contents: the system files `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM` and `SYS.COM` must be the MS-DOS 7.1 ones (IO.SYS 76036 bytes, from the system disk "W98_de"), not the older ones of DISK1.
 2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 
@@ -41,12 +41,14 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux, macOS):
 
 | File | |
 |---|---|
-| `set.psd1` | the files needed, the archive layout, names of compressed files |
+| `set.psd1` | the files needed (and their disks), the archive layout, names of compressed files |
 | `INSTALL.INI` | the setup (options, `CONFIG.SYS`, `AUTOEXEC.BAT`, texts) |
 | `LIZENZ.TXT` | the license notice shown by default |
 | `LIESMICH.TXT` | readme |
 
 Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country, MS-DOS Shell (VGA), MS-DOS 5.0/6.22 utilities, Windows 95 MS-DOS utilities (MEMMAKER, MSBACKUP, ...), AccessDOS, keyboard utilities, DRVBOOT, MS-DOS 6.22 network files.
+
+`tools\mkfilelist.ps1 -Source <folder>` writes `FILES.md` from `set.psd1`.
 
 ## How it works
 

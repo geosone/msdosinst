@@ -97,9 +97,9 @@ function Read-TextFile([string]$path) {
 function Get-SourceName([string]$entry) { return ($entry -split '=', 2)[0].ToUpperInvariant() }
 
 $groups = @(
-    [pscustomobject]@{ Name = 'System files (disk 1)'; Files = $def.System; Optional = $false }
-    [pscustomobject]@{ Name = 'Setup programs (disk 1)'; Files = $def.BootFiles; Optional = $false }
-) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Files = $_.Files; Optional = [bool]$_.Optional } })
+    [pscustomobject]@{ Name = 'System files'; From = $def.SystemFrom; Files = $def.System; Optional = $false }
+    [pscustomobject]@{ Name = 'Setup programs'; From = $def.BootFrom; Files = $def.BootFiles; Optional = $false }
+) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional } })
 
 # all files below $Source by name
 $index = @{}
@@ -132,7 +132,7 @@ $skipGroup = @{}
 foreach ($g in $groups) {
     $missing = @($g.Files | ForEach-Object { Get-SourceName $_ } | Where-Object { $Source -and -not (Find-SourceFile $_) })
     if ($List) {
-        Write-Host ("{0}{1}" -f $g.Name, $(if ($g.Optional) { ' (optional)' } else { '' }))
+        Write-Host ("{0}{1}  - from: {2}" -f $g.Name, $(if ($g.Optional) { ' (optional)' } else { '' }), $g.From)
         foreach ($f in $g.Files) {
             $n = Get-SourceName $f
             $mark = if (-not $Source) { '  ' } elseif ($missing -contains $n) { '- ' } else { '+ ' }
