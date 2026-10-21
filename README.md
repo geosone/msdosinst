@@ -14,13 +14,13 @@ The files are packed with deflate, so the MS-DOS 7.1 disks 1-4, the MS-DOS 6.22 
 
 ## Use
 
-PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux, macOS):
+PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux): clone with the submodules (`git clone --recursive`, or `git submodule update --init`).
 
     .\mkdosset.ps1 -List                       # the files the set needs
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
     .\mkdosset.ps1 -Source D:\dosfiles -Extra D:\ahciaspi
 
-1. Copy the files of your disks into one folder (subfolders are fine). **[FILES.md](FILES.md) lists every file the set needs, with its size and the disk it comes from** (`-List` shows the same). A file name must not occur twice with different contents: the system files `IO.SYS`, `MSDOS.SYS` and `SYS.COM` must be the MS-DOS 7.1 ones (IO.SYS 76036 bytes, from the system disk "W98_de"), not the older ones of DISK1; `COMMAND.COM` is the one of the Windows 98 SE CD (96370 bytes, in `WIN98\PRECOPY2.CAB`), which the script patches like on the system disk.
+1. Copy the files of your disks into one folder (subfolders are fine). **[FILES.md](FILES.md) lists every file the set needs, with its size and the disk it comes from** (`-List` shows the same). A file name must not occur twice with different contents: `SYS.COM` must be the MS-DOS 7.1 one of the system disk "W98_de", not the older one of DISK1. `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
 2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 
@@ -54,6 +54,8 @@ Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country
 ## How it works
 
 - `tools\GdiDisk.ps1` / `GdiDisk.cs` (from the GDI project): FAT12 image writer with our own boot sector for the MS-DOS 7.x `IO.SYS`, SZDD/KWAJ expand (the `*.??_` files), GDA archives (deflate, split over disks).
+- `IO.SYS`: [small-io-sys](https://github.com/geosone/small-io-sys) (submodule `ext\small-io-sys`, German build `compile.ps1 de`) makes it from `winboot.sys` of the CD: the changes of the Microsoft update KB311561, MS-DOS 7.1 instead of Windows 98 in the messages, without logo and MSDCM, compressed with aPACK (72,815 bytes). On Windows it downloads nasm and [apack1p](https://github.com/pts/apack1p) (submodule `ext\apack1p`, the source) once.
+- `COMMAND.COM`: the one of the same CD, with MS-DOS 7.1 in the messages (`Patches` in `set.psd1`), like on the MS-DOS 7.1 system disk.
 - Disk 1: `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM`, `SYS.COM`, `FDISK`, `FORMAT`, `KEYB`, `INSTALL.EXE`, `INSTALL.INI`, texts and the first archive part; the other disks hold the archive parts `MSDOS71.D02` ...
 
 Tested in QEMU: empty 500 MB disk, FDISK, restart, FORMAT, installation from 4 disks, AHCIASPI from an extra disk, boot from C: with CD-ROM (ASPICD + MSCDEX).

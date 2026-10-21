@@ -264,31 +264,20 @@ Write-Host ("Archive: {0} files, {1:N0} bytes" -f $archive.Count, $total)
 
 # --- IO.SYS and COMMAND.COM: ext/small-io-sys ------------------------------------
 
-# compile.sh de builds IO.SYS in ext/small-io-sys/de from the PRECOPY CABs
-# and extracts COMMAND.COM; it runs with sh on Linux, with WSL on Windows
+# compile.ps1 de builds IO.SYS in ext/small-io-sys/de from the PRECOPY CABs
+# and extracts COMMAND.COM (on Windows it downloads nasm and apack1p once)
 $made = @{}
 if ($def.IoSysCabs) {
     $sios = Join-Path $PSScriptRoot 'ext/small-io-sys'
-    if (-not (Test-Path -LiteralPath (Join-Path $sios 'compile.sh'))) {
+    if (-not (Test-Path -LiteralPath (Join-Path $sios 'compile.ps1'))) {
         throw "ext/small-io-sys is missing: git submodule update --init"
     }
     $build = Join-Path $sios 'de'
     if (Test-Path -LiteralPath $build) { Remove-Item -LiteralPath $build -Recurse -Force }
     New-Item -ItemType Directory -Path $build | Out-Null
     foreach ($n in $def.IoSysCabs) { Copy-Item -LiteralPath (Find-SourceFile $n).FullName -Destination (Join-Path $build $n) }
-    $script = Join-Path $sios 'compile.sh'
-    if ([Environment]::OSVersion.Platform -eq 'Win32NT') {
-        if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) {
-            throw "IO.SYS is built by ext/small-io-sys, which needs WSL on Windows (wsl --install)"
-        }
-        $log = & wsl.exe sh ((& wsl.exe wslpath -a -u $script) | Select-Object -First 1) de 2>&1
-    } else {
-        $log = & sh $script de 2>&1
-    }
-    if ($LASTEXITCODE) {
-        $log | Select-Object -Last 15 | ForEach-Object { Write-Host "  $_" }
-        throw "ext/small-io-sys/compile.sh de failed (exit code $LASTEXITCODE)"
-    }
+    try { & (Join-Path $sios 'compile.ps1') de *>&1 | Out-Null }
+    catch { throw "ext/small-io-sys/compile.ps1 de failed: $_" }
     foreach ($m in @(@('IO.SYS', 'IO.SYS.win98sekbpc'), @('COMMAND.COM', 'command.com'))) {
         $f = Get-Item -LiteralPath (Join-Path $build $m[1])
         $made[$m[0]] = [pscustomobject]@{ Name = $m[0]; Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
