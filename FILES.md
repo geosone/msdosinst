@@ -1,5 +1,10 @@
 # Files needed for the MS-DOS 7.1 disk set (msdos71de)
 
+ msdos de downlaod links https://vetusware.com/download/MS-DOS%207.1%207.1%20DE/?id=9458
+ msdos 7.1 , startdiskteet https://dosreloaded.de/forum/core/attachment/88741-w98-de-zip/
+ https://archive.org/details/msdos_6.22_de
+ olddos https://winworldpc.com/product/windows-95/rtm
+
 Copy these files from **your own** disks into one folder (subfolders are fine) and run `.\mkdosset.ps1 -Source <folder>`. `.\mkdosset.ps1 -List -Source <folder>` shows which of them are still missing.
 
 - File names as on the disks: compressed files (`*.??_`) are taken as they are, the script expands them.
