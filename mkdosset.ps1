@@ -139,7 +139,7 @@ $cdPatterns = @(foreach ($g in $groups) {
         $s = Get-Spec $e $g.Medium
         if ($s.Medium -and $s.Path -match '\\') { ($s.Path -replace '\\[^\\]*$', '') + '\*' }
     }
-}) + @(foreach ($k in $def.Media.Keys) { $def.Media[$k].Find }) | ForEach-Object { $_.Replace('\', '/') } | Select-Object -Unique
+}) + @(foreach ($k in $def.Media.Keys) { $def.Media[$k].Find }) | ForEach-Object { $_.Replace('\', '/') } | Sort-Object -Unique
 
 function Get-SevenZip([string]$for) {
     foreach ($c in '7z', '7zz', '7za') {
@@ -156,7 +156,11 @@ function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
     $len = $f.Length
     if ($f.LinkTarget) { $len = (Get-Item -LiteralPath ([IO.Path]::Combine($f.DirectoryName, $f.LinkTarget))).Length }   # symbolic link
     $d = Join-Path $into (('{0}-{1}' -f ($f.BaseName -replace '[^\w.-]', '_'), $len))
-    if (Test-Path -LiteralPath (Join-Path $d '.done')) { return $d }
+    # .done holds the folders unpacked from a CD (also in a .7z): unpack again
+    # when they change
+    $what = if ($f.Extension -in '.iso', '.7z') { $cdPatterns -join "`n" } else { '' }
+    $done = Join-Path $d '.done'
+    if ((Test-Path -LiteralPath $done) -and ([IO.File]::ReadAllText($done) -eq $what)) { return $d }
     if (Test-Path -LiteralPath $d) { Remove-Item -LiteralPath $d -Recurse -Force }
     New-Item -ItemType Directory -Path $d | Out-Null
     $7z = Get-SevenZip $f.Name
@@ -176,7 +180,7 @@ function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
         default { $log = & $7z x -y "-o$d" $f.FullName 2>&1 }
     }
     if ($LASTEXITCODE) { throw "7-Zip failed on $($f.FullName):`n$($log -join "`n")" }
-    New-Item -ItemType File -Path (Join-Path $d '.done') | Out-Null
+    [IO.File]::WriteAllText($done, $what)
     return $d
 }
 

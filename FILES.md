@@ -1,10 +1,5 @@
 # Files needed for the MS-DOS 7.1 disk set (msdos71de)
 
- https://winworldpc.com/product/windows-me/final
- https://winworldpc.com/product/windows-98/98-second-edition
- https://winworldpc.com/product/windows-95/osr-3
- https://winworldpc.com/product/ms-dos/622
-
 Put **your own** media into one folder (subfolders are fine): the CD images (`*.iso`), the disk images (`*.img`) or 7-Zip archives of them (`*.7z`) as they are - the script unpacks them with 7-Zip - or copies of the CDs (or the folders named below) and the files of your disks. Then run `.\mkdosset.ps1 -Source <folder>`. `.\mkdosset.ps1 -List -Source <folder>` shows which of them are still missing.
 
 - Files of a CD are found by their place on the CD (keep its folders); `X.CAB > NAME` = the file NAME in that CAB, the script extracts it (the other CABs of the CD must be in the same folder, a file can continue in the next CAB). The size is that of the extracted file.
@@ -18,7 +13,7 @@ Put **your own** media into one folder (subfolders are fine): the CD images (`*.
 | Name | Found by |
 |---|---|
 | MS-DOS 6.22 disk 1 (German) | `DOSSETUP.INI` |
-| Windows 95 CD (German) | `OTHER\OLDMSDOS\MEMMAKER.EXE` |
+| Windows 95 CD (German, 1995, not OSR 2.x) | `OTHER\OLDMSDOS\MEMMAKER.EXE` |
 | Windows 98 SE CD (German) | `WIN98\WIN98_25.CAB` |
 | Windows ME CD (German) | `WIN9X\WIN_19.CAB` |
 
@@ -90,7 +85,6 @@ From: Windows ME CD, folders WIN9X and TOOLS\OLDMSDOS
 | `XCOPY32.MOD` | `WIN9X\WIN_18.CAB > XCOPY32.MOD` | 41,984 |
 | `DRVSPACE.BIN` | `WIN9X\PRECOPY1.CAB > DRVSPACE.BIN` | 69,079 |
 | `DRVSPACE.SYS` | `WIN9X\PRECOPY1.CAB > DRVSPACE.SYS` | 2,151 |
-| `SCANREG.EXE` | `WIN9X\PRECOPY1.CAB > SCANREG.EXE` | 173,246 |
 | `MSCDEX.EXE` | `WIN9X\BASE2.CAB > MSCDEX.EXE` | 25,473 |
 | `ASPI2DOS.SYS` | `WIN9X\BASE2.CAB > ASPI2DOS.SYS` | 35,330 |
 | `ASPI4DOS.SYS` | `WIN9X\BASE2.CAB > ASPI4DOS.SYS` | 14,386 |
@@ -100,6 +94,7 @@ From: Windows ME CD, folders WIN9X and TOOLS\OLDMSDOS
 | `BTCDROM.SYS` | `WIN9X\BASE2.CAB > BTCDROM.SYS` | 21,971 |
 | `BTDOSM.SYS` | `WIN9X\BASE2.CAB > BTDOSM.SYS` | 30,955 |
 | `OAKCDROM.SYS` | `WIN9X\BASE2.CAB > OAKCDROM.SYS` | 41,302 |
+| `RAMDRIVE.SYS` | `WIN9X\NET4.CAB > RAMDRIVE.SYS` | 12,823 |
 | `EXTRACT.EXE` | `WIN9X\EXTRACT.EXE` | 53,767 |
 | `SMARTDRV.EXE` | `WIN9X\SMARTDRV.EXE` | 45,379 |
 | `HELP.COM` | `TOOLS\OLDMSDOS\HELP.COM` | 429 |
@@ -109,22 +104,64 @@ From: Windows ME CD, folders WIN9X and TOOLS\OLDMSDOS
 
 ## MS-DOS 7.1 programs (Windows 98 SE)
 
-From: Windows 98 SE CD, folder WIN98 (not in Windows ME)
+From: Windows 98 SE CD, folders WIN98 and TOOLS\RESKIT (not in Windows ME)
 
 | File | On the CD | Size (bytes) |
 |---|---|---:|
 | `NLSFUNC.EXE` | `WIN98\WIN98_44.CAB > NLSFUNC.EXE` | 7,020 |
 | `EXT.EXE` | `WIN98\EBD.CAB > EXT.EXE` | 13,299 |
+| `EGA2.CPI` | `TOOLS\RESKIT\CONFIG\CHDOSCP\CODEPAGE\EGA2.CPI` | 58,870 |
+| `EGA3.CPI` | `TOOLS\RESKIT\CONFIG\CHDOSCP\CODEPAGE\EGA3.CPI` | 58,753 |
 
 ## MS-DOS 6.22 (optional)
 
-From: MS-DOS 6.22 disks 1 and 2
+From: MS-DOS 6.22 disks 1-3
 
 | File | On the CD | Size (bytes) |
 |---|---|---:|
 | `EXPAND.EXE` | `EXPAND.EXE` | 16,365 |
+| `DISKCOMP.CO_` |  | 6,833 |
+| `DRIVER.SY_` |  | 4,066 |
+| `FASTHELP.EX_` |  | 7,580 |
+| `DOSHELP.HL_` |  | 3,046 |
+| `FASTOPEN.EX_` |  | 7,902 |
 | `POWER.EX_` |  | 5,624 |
 | `SHARE.EX_` |  | 8,191 |
+| `UNFORMAT.COM` |  | 13,168 |
+| `MSAV.EXE` |  | 173,312 |
+| `MSAV.HL_` |  | 15,772 |
+| `MSAVHELP.OV_` |  | 17,796 |
+| `MSAVIRUS.LS_` |  | 11,473 |
+| `VSAFE.CO_` |  | 33,163 |
+
+## Windows 3.x programs of MS-DOS 6.22 (optional)
+
+From: MS-DOS 6.22 disks 2 and 3
+
+| File | Size (bytes) |
+|---|---:|
+| `MWBACKUP.EX_` | 159,948 |
+| `MWBACKR.DL_` | 32,779 |
+| `MWBACKF.DL_` | 6,956 |
+| `MWBACKUP.HL_` | 155,406 |
+| `MSTOOLS.DL_` | 8,812 |
+| `VFINTD.38_` | 1,289 |
+| `MWAV.EX_` | 65,988 |
+| `MWAV.HL_` | 13,293 |
+| `MWAVABSI.DL_` | 23,207 |
+| `MWAVDLG.DL_` | 10,599 |
+| `MWAVDOSL.DL_` | 19,746 |
+| `MWAVDRVL.DL_` | 4,228 |
+| `MWAVMGR.DL_` | 9,571 |
+| `MWAVSCAN.DL_` | 70,797 |
+| `MWAVSOS.DL_` | 3,983 |
+| `MWAVTSR.EX_` | 8,656 |
+| `MWGRAFIC.DL_` | 18,094 |
+| `MWUNDEL.EX_` | 66,422 |
+| `MWUNDEL.HL_` | 19,187 |
+| `SMARTMON.EX_` | 13,747 |
+| `SMARTMON.HL_` | 7,319 |
+| `WNTOOLS.GR_` | 1,103 |
 
 ## MS-DOS Shell (optional)
 
@@ -219,7 +256,7 @@ From: MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)
 
 ## MS-DOS utilities for Windows 95 (OLDMSDOS) (optional)
 
-From: Windows 95 CD, folder OTHER\OLDMSDOS
+From: Windows 95 CD (1995, not OSR 2.x), folder OTHER\OLDMSDOS
 
 | File | On the CD | Size (bytes) |
 |---|---|---:|

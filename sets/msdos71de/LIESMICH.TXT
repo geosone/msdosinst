@@ -23,7 +23,13 @@ Programme
 MS-DOS 7.1 aus Windows 98 SE mit den neuesten MS-DOS-Programmen aus
 Windows ME (FDISK und FORMAT zeigen auch Festplatten über 64 GB
 richtig an), dazu die Programme von MS-DOS 6.22, die es in Windows
-98/ME nicht mehr gibt (EXPAND, POWER, SHARE für Windows 3.x).
+98/ME nicht mehr gibt (EXPAND, DISKCOMP, FASTOPEN, FASTHELP, UNFORMAT,
+MSAV, VSAFE, DRIVER.SYS, POWER, SHARE für Windows 3.x). DEFRAG fehlt:
+das von MS-DOS 6.22 kennt weder lange Dateinamen noch FAT32, das von
+Windows 95/98/ME läuft nur unter Windows.
+
+SHARE wird nur mit der Option "SHARE laden" geladen
+(INSTALL=C:\DOS\SHARE.EXE in der CONFIG.SYS).
 
 Optionen
 --------
@@ -35,5 +41,7 @@ Optionen
   Zusatzprogramme Windows 95   MEMMAKER, MSBACKUP, INTERLNK, ...
   AccessDOS, Tastatur-Utilities, DRVBOOT, Netzwerkdateien
                                von der MS-DOS 6.22-Zusatzdiskette
+  SHARE laden                  für Windows 3.x (aus)
+  Windows 3.x-Programme        MWBACKUP, MWAV, MWUNDEL, SMARTMON (aus)
 
 Erstellt mit mkdosset.ps1: https://github.com/geosone/msdosinst

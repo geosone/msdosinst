@@ -17,7 +17,8 @@
     Media = @{
         WinMe   = @{ Name = 'Windows ME CD (German)'; Find = 'WIN9X\WIN_19.CAB' }
         Win98se = @{ Name = 'Windows 98 SE CD (German)'; Find = 'WIN98\WIN98_25.CAB' }
-        Win95   = @{ Name = 'Windows 95 CD (German)'; Find = 'OTHER\OLDMSDOS\MEMMAKER.EXE' }
+        # the first Windows 95 (1995): OTHER\OLDMSDOS of OSR 2.x has only HELP and QBASIC
+        Win95   = @{ Name = 'Windows 95 CD (German, 1995, not OSR 2.x)'; Find = 'OTHER\OLDMSDOS\MEMMAKER.EXE' }
         # the Supplemental Disk has another EXPAND.EXE (English)
         Dos622  = @{ Name = 'MS-DOS 6.22 disk 1 (German)'; Find = 'DOSSETUP.INI' }
     }
@@ -56,18 +57,31 @@
                      'WIN9X\WIN_17.CAB>SCANDISK.EXE', 'WIN9X\WIN_17.CAB>SETVER.EXE', 'WIN9X\WIN_17.CAB>SORT.EXE',
                      'WIN9X\WIN_17.CAB>SUBST.EXE', 'WIN9X\WIN_17.CAB>XCOPY.EXE', 'WIN9X\WIN_17.CAB>XCOPY32.EXE',
                      'WIN9X\WIN_18.CAB>EDIT.HLP', 'WIN9X\WIN_18.CAB>SCANDISK.INI', 'WIN9X\WIN_18.CAB>XCOPY32.MOD',
-                     'WIN9X\PRECOPY1.CAB>DRVSPACE.BIN', 'WIN9X\PRECOPY1.CAB>DRVSPACE.SYS', 'WIN9X\PRECOPY1.CAB>SCANREG.EXE',
+                     'WIN9X\PRECOPY1.CAB>DRVSPACE.BIN', 'WIN9X\PRECOPY1.CAB>DRVSPACE.SYS',
                      'WIN9X\BASE2.CAB>MSCDEX.EXE', 'WIN9X\BASE2.CAB>ASPI2DOS.SYS', 'WIN9X\BASE2.CAB>ASPI4DOS.SYS',
                      'WIN9X\BASE2.CAB>ASPI8DOS.SYS', 'WIN9X\BASE2.CAB>ASPI8U2.SYS', 'WIN9X\BASE2.CAB>ASPICD.SYS',
                      'WIN9X\BASE2.CAB>BTCDROM.SYS', 'WIN9X\BASE2.CAB>BTDOSM.SYS', 'WIN9X\BASE2.CAB>OAKCDROM.SYS',
+                     'WIN9X\NET4.CAB>RAMDRIVE.SYS',
                      'WIN9X\EXTRACT.EXE', 'WIN9X\SMARTDRV.EXE',
                      'TOOLS\OLDMSDOS\HELP.COM', 'TOOLS\OLDMSDOS\MSD.EXE', 'TOOLS\OLDMSDOS\QBASIC.EXE', 'TOOLS\OLDMSDOS\QBASIC.HLP') }
-        @{ Name = 'MS-DOS 7.1 programs (Windows 98 SE)'; From = 'Windows 98 SE CD, folder WIN98 (not in Windows ME)'; Medium = 'Win98se'; To = 'DOS'
-           Files = @('WIN98\WIN98_44.CAB>NLSFUNC.EXE', 'WIN98\EBD.CAB>EXT.EXE') }
-        # not in Windows 98/ME; SHARE for Windows 3.x (MS-DOS 7.1 has it built
-        # in, SHARE.EXE only says so)
-        @{ Name = 'MS-DOS 6.22'; From = 'MS-DOS 6.22 disks 1 and 2'; To = 'DOS'; Optional = $true
-           Files = @('Dos622:EXPAND.EXE', 'POWER.EX_', 'SHARE.EX_') }
+        @{ Name = 'MS-DOS 7.1 programs (Windows 98 SE)'; From = 'Windows 98 SE CD, folders WIN98 and TOOLS\RESKIT (not in Windows ME)'; Medium = 'Win98se'; To = 'DOS'
+           Files = @('WIN98\WIN98_44.CAB>NLSFUNC.EXE', 'WIN98\EBD.CAB>EXT.EXE',
+                     'TOOLS\RESKIT\CONFIG\CHDOSCP\CODEPAGE\EGA2.CPI', 'TOOLS\RESKIT\CONFIG\CHDOSCP\CODEPAGE\EGA3.CPI') }
+        # the MS-DOS programs of MS-DOS 6.22 that are not in Windows 95/98/ME
+        # (DEFRAG is left out: it knows neither long file names nor FAT32);
+        # SHARE for Windows 3.x (MS-DOS 7.1 has no SHARE, the setup option
+        # loads it with INSTALL= in CONFIG.SYS)
+        @{ Name = 'MS-DOS 6.22'; From = 'MS-DOS 6.22 disks 1-3'; To = 'DOS'; Optional = $true
+           Files = @('Dos622:EXPAND.EXE', 'DISKCOMP.CO_', 'DRIVER.SY_', 'FASTHELP.EX_', 'DOSHELP.HL_', 'FASTOPEN.EX_',
+                     'POWER.EX_', 'SHARE.EX_', 'UNFORMAT.COM', 'MSAV.EXE', 'MSAV.HL_', 'MSAVHELP.OV_', 'MSAVIRUS.LS_',
+                     'VSAFE.CO_') }
+        # Windows 3.x programs of MS-DOS 6.22: Backup, Anti-Virus, Undelete,
+        # SmartDrive monitor, the File Manager tools menu, the group file
+        @{ Name = 'Windows 3.x programs of MS-DOS 6.22'; From = 'MS-DOS 6.22 disks 2 and 3'; To = 'SUPP\WIN3'; Optional = $true
+           Files = @('MWBACKUP.EX_', 'MWBACKR.DL_', 'MWBACKF.DL_', 'MWBACKUP.HL_', 'MSTOOLS.DL_', 'VFINTD.38_',
+                     'MWAV.EX_', 'MWAV.HL_', 'MWAVABSI.DL_', 'MWAVDLG.DL_', 'MWAVDOSL.DL_', 'MWAVDRVL.DL_', 'MWAVMGR.DL_',
+                     'MWAVSCAN.DL_', 'MWAVSOS.DL_', 'MWAVTSR.EX_', 'MWGRAFIC.DL_', 'MWUNDEL.EX_', 'MWUNDEL.HL_',
+                     'SMARTMON.EX_', 'SMARTMON.HL_', 'WNTOOLS.GR_') }
         @{ Name = 'MS-DOS Shell'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\SHELL'; Optional = $true; KeepFirst = $true
            Files = @('DOSSHELL.CO_', 'DOSSHELL.EX_', 'DOSSHELL.HL_', 'DOSSWAP.EX_',
                      'VGA.GR_=DOSSHELL.GRB', 'EGA.IN_=DOSSHELL.INI', 'VGA.VI_=DOSSHELL.VID') }
@@ -85,7 +99,7 @@
         @{ Name = 'MS-DOS 6.22 network files'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\NET'; Optional = $true; KeepFirst = $true
            Files = @('NET.1X_', 'NET.TX_', 'SETNAME.EX_', 'NETBEUI.DO_', 'NETWKSTA.1X_', 'NETWKSTA.2X_',
                      'REDIR.1X_', 'REDIR.2X_') }
-        @{ Name = 'MS-DOS utilities for Windows 95 (OLDMSDOS)'; From = 'Windows 95 CD, folder OTHER\OLDMSDOS'; Medium = 'Win95'; To = 'OLD'; Optional = $true; KeepFirst = $true
+        @{ Name = 'MS-DOS utilities for Windows 95 (OLDMSDOS)'; From = 'Windows 95 CD (1995, not OSR 2.x), folder OTHER\OLDMSDOS'; Medium = 'Win95'; To = 'OLD'; Optional = $true; KeepFirst = $true
            Files = @('OTHER\OLDMSDOS\APPEND.EXE', 'OTHER\OLDMSDOS\CHKSTATE.SYS', 'OTHER\OLDMSDOS\GRAPHICS.COM',
                      'OTHER\OLDMSDOS\GRAPHICS.PRO', 'OTHER\OLDMSDOS\HELP.COM', 'OTHER\OLDMSDOS\HELP.HLP',
                      'OTHER\OLDMSDOS\INTERLNK.EXE', 'OTHER\OLDMSDOS\INTERSVR.EXE', 'OTHER\OLDMSDOS\LOADFIX.COM',
@@ -104,8 +118,8 @@
     # MS-DOS 6.22 Supplemental Disk): extension map and exceptions
     ExpandExt   = @{ 'CO_' = 'COM'; 'EX_' = 'EXE'; 'SY_' = 'SYS'; 'TX_' = 'TXT'; 'OV_' = 'OVL'; 'CP_' = 'CPI'
                      'BA_' = 'BAS'; 'GR_' = 'GRB'; 'IN_' = 'INI'; 'VI_' = 'VID'; 'HL_' = 'HLP'; '1X_' = '1XE'
-                     '2X_' = '2XE'; 'DO_' = 'DOS' }
-    ExpandNames = @{ 'DRVBOOT.BA_' = 'DRVBOOT.BAT' }
+                     '2X_' = '2XE'; 'DO_' = 'DOS'; 'LS_' = 'LST'; 'DL_' = 'DLL'; '38_' = '386' }
+    ExpandNames = @{ 'DRVBOOT.BA_' = 'DRVBOOT.BAT'; 'WNTOOLS.GR_' = 'WNTOOLS.GRP' }
 
     # Patches: Old/New in hex or OldText/NewText (code page 850), at offset
     # At or where Old occurs exactly once (Count = that many times, all)
@@ -114,8 +128,8 @@
         # and the OLDMSDOS utilities of Windows 95): they accept only MS-DOS 6.22
         # (CMP AX,1606h) resp. 6.20-6.x (AM.EXE, INT 21h AX=3306h) and are
         # patched to accept MS-DOS 7.10
-        @{ Files = @('APPEND.EXE', 'ASSIGN.COM', 'BACKUP.EXE', 'EDLIN.EXE', 'EXE2BIN.EXE', 'GRAFTABL.COM',
-                     'GRAPHICS.COM', 'JOIN.EXE', 'PRINT.EXE', 'REPLACE.EXE', 'RESTORE.EXE', 'SHARE.EXE', 'TREE.COM')
+        @{ Files = @('APPEND.EXE', 'ASSIGN.COM', 'BACKUP.EXE', 'DISKCOMP.COM', 'DRIVER.SYS', 'EDLIN.EXE', 'EXE2BIN.EXE',
+                     'FASTOPEN.EXE', 'GRAFTABL.COM', 'GRAPHICS.COM', 'JOIN.EXE', 'PRINT.EXE', 'REPLACE.EXE', 'RESTORE.EXE', 'SHARE.EXE', 'TREE.COM')
            Old = 'B4 30 CD 21 3D 06 16 75 03'; New = 'B4 30 CD 21 3D 07 0A 75 03' }
         @{ Files = @('APPEND.EXE')
            Old = 'B4 30 E8 CF FD 3D 06 16 75 02'; New = 'B4 30 E8 CF FD 3D 07 0A 75 02' }
