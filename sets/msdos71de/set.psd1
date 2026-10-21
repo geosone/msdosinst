@@ -9,11 +9,17 @@
     Label  = 'MSDOS71'            # volume labels "MSDOS71 1", ...
     Keyboard = 'GR'               # KEYB on the setup disk
 
-    # disk 1: the patched MS-DOS 7.1 system files (IO.SYS 76036 bytes from
-    # the system disk "W98_de"; COMMAND.COM of the Windows 98 SE CD, see
-    # Patches), the boot sector is written by mkdosset.ps1
+    # disk 1: the MS-DOS 7.1 system files, the boot sector is written by
+    # mkdosset.ps1.  IO.SYS is built by ext/small-io-sys (compile.sh de) from
+    # winboot.sys of the Windows 98 SE CD, COMMAND.COM is the one of the same
+    # CD (see Patches); both are in WIN98\PRECOPY1.CAB, continued in
+    # PRECOPY2.CAB.  MSDOS.SYS is MsdosSys, SYS.COM comes from the system disk.
     System     = @('IO.SYS', 'MSDOS.SYS', 'COMMAND.COM', 'SYS.COM')
     SystemFrom = 'MS-DOS 7.1 system disk "W98_de" (Win98_System_deutsch.IMG)'
+    IoSysCabs  = @('PRECOPY1.CAB', 'PRECOPY2.CAB')
+    IoSysFrom  = 'Windows 98 SE CD, folder WIN98'
+    # the options that the IO.SYS of the system disk had built in
+    MsdosSys   = @('[Options]', 'BootKeys=0', 'Logo=0', 'DblSpace=0', 'DrvSpace=0', 'SystemReg=0')
     BootFiles  = @('FDISK.EXE', 'FORMAT.COM', 'KEYB.COM', 'KEYBOARD.SYS', 'KEYBRD2.SYS')
     BootFrom   = 'MS-DOS 7.1 disk 1'
 

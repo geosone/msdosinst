@@ -1,0 +1,6 @@
+[submodule "ext/small-io-sys"]
+	path = ext/small-io-sys
+	url = https://github.com/geosone/small-io-sys.git
+[submodule "ext/apack1p"]
+	path = ext/apack1p
+	url = https://github.com/pts/apack1p.git

@@ -96,8 +96,17 @@ function Read-TextFile([string]$path) {
 # source name of a list entry "A=B"
 function Get-SourceName([string]$entry) { return ($entry -split '=', 2)[0].ToUpperInvariant() }
 
+# system files that the script makes: IO.SYS and COMMAND.COM from the CABs
+# of IoSysCabs (with ext/small-io-sys), MSDOS.SYS from MsdosSys
+$madeSystem = @()
+if ($def.IoSysCabs) { $madeSystem += 'IO.SYS', 'COMMAND.COM' }
+if ($def.MsdosSys) { $madeSystem += 'MSDOS.SYS' }
+
 $groups = @(
-    [pscustomobject]@{ Name = 'System files'; From = $def.SystemFrom; Files = $def.System; Optional = $false }
+    [pscustomobject]@{ Name = 'System files'; From = $def.SystemFrom; Files = @($def.System | Where-Object { $madeSystem -notcontains $_ }); Optional = $false }
+) + @(if ($def.IoSysCabs) {
+    [pscustomobject]@{ Name = 'IO.SYS and COMMAND.COM'; From = $def.IoSysFrom; Files = $def.IoSysCabs; Optional = $false }
+}) + @(
     [pscustomobject]@{ Name = 'Setup programs'; From = $def.BootFrom; Files = $def.BootFiles; Optional = $false }
 ) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional } })
 
@@ -253,6 +262,43 @@ foreach ($e in $entries.Values) { $archive.Add($e) }
 $total = 0; foreach ($e in $archive) { $total += $e.Data.Length }
 Write-Host ("Archive: {0} files, {1:N0} bytes" -f $archive.Count, $total)
 
+# --- IO.SYS and COMMAND.COM: ext/small-io-sys ------------------------------------
+
+# compile.sh de builds IO.SYS in ext/small-io-sys/de from the PRECOPY CABs
+# and extracts COMMAND.COM; it runs with sh on Linux, with WSL on Windows
+$made = @{}
+if ($def.IoSysCabs) {
+    $sios = Join-Path $PSScriptRoot 'ext/small-io-sys'
+    if (-not (Test-Path -LiteralPath (Join-Path $sios 'compile.sh'))) {
+        throw "ext/small-io-sys is missing: git submodule update --init"
+    }
+    $build = Join-Path $sios 'de'
+    if (Test-Path -LiteralPath $build) { Remove-Item -LiteralPath $build -Recurse -Force }
+    New-Item -ItemType Directory -Path $build | Out-Null
+    foreach ($n in $def.IoSysCabs) { Copy-Item -LiteralPath (Find-SourceFile $n).FullName -Destination (Join-Path $build $n) }
+    $script = Join-Path $sios 'compile.sh'
+    if ([Environment]::OSVersion.Platform -eq 'Win32NT') {
+        if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) {
+            throw "IO.SYS is built by ext/small-io-sys, which needs WSL on Windows (wsl --install)"
+        }
+        $log = & wsl.exe sh ((& wsl.exe wslpath -a -u $script) | Select-Object -First 1) de 2>&1
+    } else {
+        $log = & sh $script de 2>&1
+    }
+    if ($LASTEXITCODE) {
+        $log | Select-Object -Last 15 | ForEach-Object { Write-Host "  $_" }
+        throw "ext/small-io-sys/compile.sh de failed (exit code $LASTEXITCODE)"
+    }
+    foreach ($m in @(@('IO.SYS', 'IO.SYS.win98sekbpc'), @('COMMAND.COM', 'command.com'))) {
+        $f = Get-Item -LiteralPath (Join-Path $build $m[1])
+        $made[$m[0]] = [pscustomobject]@{ Name = $m[0]; Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
+    }
+    Write-Host ("IO.SYS (small-io-sys)                        {0,7:N0} bytes" -f $made['IO.SYS'].Data.Length)
+}
+if ($def.MsdosSys) {
+    $made['MSDOS.SYS'] = [pscustomobject]@{ Name = 'MSDOS.SYS'; Data = (ConvertTo-DosText ($def.MsdosSys -join "`n")); Time = (Get-Date) }
+}
+
 # --- disk 1 --------------------------------------------------------------------------
 
 if (-not $Installer) {
@@ -268,7 +314,7 @@ $now = Get-Date
 $disk1 = [GeosOne.Gdi.Fat12Image]::new([GeosOne.Gdi.BootSectors]::Win9xFat12, "$($def.Label) 1", $serial)
 $disk1Files = [ordered]@{}
 foreach ($n in $def.System) {
-    $f = Set-Patch $n (Read-SourceFile $n)
+    $f = Set-Patch $n $(if ($made.ContainsKey($n)) { $made[$n] } else { Read-SourceFile $n })
     $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = $(if ($n -in 'IO.SYS', 'MSDOS.SYS') { 7 } else { 0x20 }) }
 }
 $kb = $def.Keyboard
