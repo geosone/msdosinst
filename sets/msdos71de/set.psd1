@@ -159,6 +159,40 @@
         @{ Files = @('FORMAT.COM'); At = 0x38D; Old = '0B 00 03 32 08 00 01 A1 0D 00'; New = '0B 00 03 32 08 00 01 B1 0D 00' }
         @{ Files = @('FORMAT.COM'); At = 0x398; Old = '0B 00 05 32'; New = '0B 00 01 32' }
 
+        # Windows ME FORMAT.COM: /S again. /S only sets bit 1 of [310Ch]
+        # ("Microsoft Windows unterstuetzt den Befehl format /s nicht mehr"),
+        # now bit 200h as in Windows 98 (or byte [310Dh],2); /? shows the two
+        # /S lines again (the help loop skipped messages 136h and 137h)
+        @{ Files = @('FORMAT.COM'); At = 0x6A2A; Old = '83 0E 0C 31 01'; New = '80 0E 0D 31 02' }
+        @{ Files = @('FORMAT.COM'); At = 0x6BFC; Old = '37 01'; New = 'FF FF' }
+        @{ Files = @('FORMAT.COM'); At = 0x6C04; Old = '36 01'; New = 'FF FF' }
+        # Windows ME no longer reads the system files (the code of Windows 98
+        # that does is gone), so its copy routine (bit 200h) writes no usable
+        # files; it is replaced by "%COMSPEC% /C SYS x:" (format-s.asm)
+        @{ Files = @('FORMAT.COM'); At = 0x83C4
+           Old = 'A0 6F 31 A2 A9 32 B9 06 00 8D 16 A9 32 B4 3C CD 21 72 65 93 B9 78 00 1E 0E 1F 8D 16 0C 2E B4 40 CD 21 1F BA E6 00 8B CA C1 E2 0A C1 E9 06 B8 00 42 CD 21 A3 65 2F 89 16 67'
+           New = '60 1E 06 A0 6F 31 2E A2 E5 2E 8E 06 21 27 26 8E 06 2C 00 31 FF 0E 1F 26 80 3D 00 74 2E BE D4 2E B9 08 00 F3 A6 74 0A 4F 30 C0 B9 FF FF F2 AE EB E6 8C 0E EC 2E 8C 0E F0 2E' }
+        @{ Files = @('FORMAT.COM'); At = 0x83FD
+           Old = '2F E8 31 EE 2B C9 B4 40 CD 21 B4 3E CD 21 A0 6F 31 A2 B3 32 B9 06 00 8D 16 B3 32 B4 3C CD 21 72 1E 93 B9 09 00 8B C1 33 D2 A3 77 2F 89 16 79 2F E8 02 EE BA C0 32 B4 40 CD'
+           New = '8C 0E F4 2E 06 1F 89 FA 0E 07 BB E8 2E B8 00 4B CD 21 07 1F 61 F8 C3 43 4F 4D 53 50 45 43 3D 0A 20 2F 43 20 53 59 53 20 41 3A 0D 00 00 DC 2E 00 00 D4 2E 00 00 D4 2E 00 00' }
+
+        # MS-DOS instead of Windows in the titles and messages (references to
+        # other systems such as Windows NT or Windows 3.x stay)
+        @{ Files = @('FDISK.EXE'); At = 0x476; OldText = '                      Microsoft Windows Millennium '; NewText = '                          Microsoft MS-DOS 7.1     ' }
+        @{ Files = @('FDISK.EXE'); At = 0x261A; OldText = 'Beenden Sie Windows vor dem Neustart.'; NewText = 'Beenden Sie alle Programme vorher.   ' }
+        @{ Files = @('FDISK.EXE'); At = 0x26AC; OldText = 'bietet diese Windows-Version eine erweiterte '; NewText = 'bietet diese MS-DOS-Version eine erweiterte  ' }
+        @{ Files = @('HIMEM.SYS'); At = 0x7CAF; OldText = 'Windows XMS-Treiber,  Version 3.95'; NewText = 'MS-DOS XMS-Treiber, Version 3.95  ' }
+        @{ Files = @('EMM386.EXE'); At = 0x1DF49; OldText = 'Windows-Expansionsspeicher-Treiber, Version 4.95'; NewText = 'MS-DOS-Expansionsspeicher-Treiber, Version 4.95 ' }
+        # "Windows ausgefuehrt wird. ..." (the u umlaut is 81h)
+        @{ Files = @('SETVER.EXE'); At = 0x583
+           Old = '57 69 6E 64 6F 77 73 20 61 75 73 67 65 66 81 68 72 74 20 77 69 72 64 2E 20 45 72 6B 75 6E 64 69 67 65 6E 20 53 69 65 20 73 69 63 68 20'
+           New = '4D 53 2D 44 4F 53 20 61 75 73 67 65 66 81 68 72 74 20 77 69 72 64 2E 20 45 72 6B 75 6E 64 69 67 65 6E 20 53 69 65 20 73 69 63 68 20 20' }
+        @{ Files = @('SETVER.EXE'); At = 0x5B3; OldText = 'beim Softwarehersteller, ob dies der Fall ist. Wenn Sie Windows '; NewText = 'beim Softwarehersteller, ob dies der Fall ist. Wenn Sie MS-DOS  ' }
+        @{ Files = @('SETVER.EXE'); At = 0x7AA; OldText = 'Legt die MS-DOS-Versionsnummer fest, die Windows einem Programm meldet.'; NewText = 'Legt die MS-DOS-Versionsnummer fest, die MS-DOS einem Programm meldet. ' }
+        @{ Files = @('SYS.COM'); At = 0x48EE; OldText = 'der entsprechenden Windows-Version.'; NewText = 'der entsprechenden MS-DOS-Version. ' }
+        @{ Files = @('DRVSPACE.BIN'); At = 0x10AC3; OldText = 'Version von Windows.'; NewText = 'Version von MS-DOS. ' }
+        @{ Files = @('DRVSPACE.BIN'); At = 0x10B59; OldText = 'um Windows zu starten.'; NewText = 'um MS-DOS zu starten. ' }
+
         # Windows ME FDISK.EXE: sizes of 100,000 MB and more with 6 digits, as
         # in the FDISK.EXE (KB263044) fixed by Petr (MSFN, "Corrected FDISK
         # and FORMAT", 2006); the Windows ME FDISK has the same code, its data

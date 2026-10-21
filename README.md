@@ -47,6 +47,7 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux): clone with the submod
 | `LIZENZ.TXT` | the license notice shown first |
 | `EULAME.TXT`, `EULA98SE.TXT`, `EULA95.TXT`, `EULA622.TXT` | the Microsoft license terms shown after it (`LicenseN=` in `INSTALL.INI`) |
 | `LIESMICH.TXT` | readme |
+| `format-s.asm` | source of the `FORMAT /S` patch (in `set.psd1`) |
 
 Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country, MS-DOS Shell (VGA), MS-DOS 5.0/6.22 utilities, Windows 95 MS-DOS utilities (MEMMAKER, MSBACKUP, ...), AccessDOS, keyboard utilities, DRVBOOT, MS-DOS 6.22 network files, Windows 3.x programs of MS-DOS 6.22 (MWBACKUP, MWAV, MWUNDEL, SMARTMON; off by default), SHARE (`INSTALL=` in `CONFIG.SYS`, off by default; MS-DOS 7.1 has no SHARE of its own, Windows 3.x wants it).
 
@@ -60,9 +61,11 @@ Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country
 - The programs of Windows ME check for MS-DOS 8.00; the script patches the check to 7.10 (likewise the 6.22 programs, which check for 6.22). Without a Windows ME counterpart are taken from Windows 98 SE: `SYS.COM`, `KEYB.COM`, `NLSFUNC.EXE`, `EXT.EXE`.
 - `FDISK.EXE` (Windows ME): sizes of 100,000 MB and more with 6 digits, as in the FDISK of KB263044 fixed by Petr ([MSFN](https://msfn.org/board/topic/85573-corrected-fdisk-and-format/)), ported to the Windows ME FDISK.
 - `FORMAT.COM` (Windows ME): the size in MB was stored in 16 bits ("16,859,84 MB" for 82,396 MB); now in 32 bits.
+- `FORMAT.COM` (Windows ME): `/S` works again. Windows ME only answers it with "Microsoft Windows unterstützt den Befehl format /s nicht mehr" and no longer reads the system files; now `/S` sets the flag of Windows 98 again and the copy routine runs `%COMSPEC% /C SYS x:` ([format-s.asm](sets/msdos71de/format-s.asm)).
+- MS-DOS instead of Windows in the titles and messages of `FDISK`, `HIMEM.SYS`, `EMM386.EXE`, `SETVER`, `SYS` and `DRVSPACE.BIN` (as in `COMMAND.COM`); references to other systems (Windows NT, Windows 3.x in enhanced mode) stay.
 - Disk 1: `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM`, `SYS.COM`, `FDISK`, `FORMAT`, `KEYB`, `INSTALL.EXE`, `INSTALL.INI`, texts and the first archive part; the other disks hold the archive parts `MSDOS71.D02` ...
 
-Tested in QEMU: empty 2 GB disk, FDISK, restart, FORMAT, installation from 4 disks, all programs from C: (`/?`), SHARE, DRIVER.SYS, RAMDRIVE, VSAFE, MSAV, FDISK and FORMAT on 100 and 200 GB disks, AHCIASPI from an extra disk, boot from C: with CD-ROM (ASPICD + MSCDEX).
+Tested in QEMU: empty 2 GB disk, FDISK, restart, FORMAT, installation from 4 disks, all programs from C: (`/?`), SHARE, DRIVER.SYS, RAMDRIVE, VSAFE, MSAV, FDISK and FORMAT on 100 and 200 GB disks, `FORMAT A: /S` (the disk boots), AHCIASPI from an extra disk, boot from C: with CD-ROM (ASPICD + MSCDEX).
 
 ## License
 
