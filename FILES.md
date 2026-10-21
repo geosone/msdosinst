@@ -1,11 +1,11 @@
 # Files needed for the MS-DOS 7.1 disk set (msdos71de)
 
- msdos de downlaod links https://vetusware.com/download/MS-DOS%207.1%207.1%20DE/?id=9458
- msdos 7.1 , startdiskteet https://dosreloaded.de/forum/core/attachment/88741-w98-de-zip/
- https://archive.org/details/msdos_6.22_de
- olddos https://winworldpc.com/product/windows-95/rtm
+ https://winworldpc.com/product/windows-me/final
+ https://winworldpc.com/product/windows-98/98-second-edition
+ https://winworldpc.com/product/windows-95/osr-3
+ https://winworldpc.com/product/ms-dos/622
 
-Copy the CDs (or the folders named below) and the files of your disks from **your own** media into one folder (subfolders are fine) and run `.\mkdosset.ps1 -Source <folder>`. `.\mkdosset.ps1 -List -Source <folder>` shows which of them are still missing.
+Put **your own** media into one folder (subfolders are fine): the CD images (`*.iso`), the disk images (`*.img`) or 7-Zip archives of them (`*.7z`) as they are - the script unpacks them with 7-Zip - or copies of the CDs (or the folders named below) and the files of your disks. Then run `.\mkdosset.ps1 -Source <folder>`. `.\mkdosset.ps1 -List -Source <folder>` shows which of them are still missing.
 
 - Files of a CD are found by their place on the CD (keep its folders); `X.CAB > NAME` = the file NAME in that CAB, the script extracts it (the other CABs of the CD must be in the same folder, a file can continue in the next CAB). The size is that of the extracted file.
 - Files of the disks are found by name: compressed files (`*.??_`) are taken as they are, the script expands them.
@@ -17,6 +17,8 @@ Copy the CDs (or the folders named below) and the files of your disks from **you
 
 | Name | Found by |
 |---|---|
+| MS-DOS 6.22 disk 1 (German) | `DOSSETUP.INI` |
+| Windows 95 CD (German) | `OTHER\OLDMSDOS\MEMMAKER.EXE` |
 | Windows 98 SE CD (German) | `WIN98\WIN98_25.CAB` |
 | Windows ME CD (German) | `WIN9X\WIN_19.CAB` |
 
@@ -118,11 +120,11 @@ From: Windows 98 SE CD, folder WIN98 (not in Windows ME)
 
 From: MS-DOS 6.22 disks 1 and 2
 
-| File | Size (bytes) |
-|---|---:|
-| `EXPAND.EXE` | 16,365 |
-| `POWER.EX_` | 5,624 |
-| `SHARE.EX_` | 8,191 |
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `EXPAND.EXE` | `EXPAND.EXE` | 16,365 |
+| `POWER.EX_` |  | 5,624 |
+| `SHARE.EX_` |  | 8,191 |
 
 ## MS-DOS Shell (optional)
 
@@ -133,9 +135,9 @@ From: MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)
 | `DOSSHELL.CO_` | 1,945 |
 | `DOSSHELL.EX_` | 143,062 |
 | `DOSSHELL.HL_` | 58,176 |
-| `DOSSWAP.EX_` | 13,498 |
+| `DOSSWAP.EX_` | 13,577 |
 | `VGA.GR_` | 3,198 |
-| `EGA.IN_` | 2,776 |
+| `EGA.IN_` | 3,076 |
 | `VGA.VI_` | 6,355 |
 
 ## MS-DOS 5.0 utilities (optional)
@@ -148,7 +150,7 @@ From: MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)
 | `BACKUP.EX_` | 22,966 |
 | `COMP.EX_` | 8,738 |
 | `CV.COM` | 716 |
-| `EDLIN.EX_` | 9,222 |
+| `EDLIN.EXE` | 12,674 |
 | `JOIN.EX_` | 12,237 |
 | `4201.CP_` | 2,399 |
 | `4208.CP_` | 359 |
@@ -219,35 +221,35 @@ From: MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)
 
 From: Windows 95 CD, folder OTHER\OLDMSDOS
 
-| File | Size (bytes) |
-|---|---:|
-| `APPEND.EXE` | 10,902 |
-| `CHKSTATE.SYS` | 42,432 |
-| `GRAPHICS.COM` | 19,790 |
-| `GRAPHICS.PRO` | 21,232 |
-| `HELP.COM` | 429 |
-| `HELP.HLP` | 350,334 |
-| `INTERLNK.EXE` | 17,709 |
-| `INTERSVR.EXE` | 38,482 |
-| `LOADFIX.COM` | 1,273 |
-| `MEMMAKER.EXE` | 120,407 |
-| `MEMMAKER.HLP` | 19,748 |
-| `MEMMAKER.INF` | 2,911 |
-| `MONOUMB.386` | 8,783 |
-| `PRINT.EXE` | 15,976 |
-| `QBASIC.EXE` | 195,372 |
-| `QBASIC.HLP` | 146,989 |
-| `REPLACE.EXE` | 20,242 |
-| `RESTORE.EXE` | 38,566 |
-| `SIZER.EXE` | 7,329 |
-| `TREE.COM` | 7,018 |
-| `UNDELETE.EXE` | 26,741 |
-| `MSBACKDB.OVL` | 64,250 |
-| `MSBACKDR.OVL` | 68,442 |
-| `MSBACKFB.OVL` | 69,866 |
-| `MSBACKFR.OVL` | 74,026 |
-| `MSBACKUP.EXE` | 5,615 |
-| `MSBACKUP.HLP` | 366,380 |
-| `MSBACKUP.OVL` | 134,432 |
-| `MSBCONFG.HLP` | 54,031 |
-| `MSBCONFG.OVL` | 47,338 |
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `APPEND.EXE` | `OTHER\OLDMSDOS\APPEND.EXE` | 10,902 |
+| `CHKSTATE.SYS` | `OTHER\OLDMSDOS\CHKSTATE.SYS` | 42,432 |
+| `GRAPHICS.COM` | `OTHER\OLDMSDOS\GRAPHICS.COM` | 19,790 |
+| `GRAPHICS.PRO` | `OTHER\OLDMSDOS\GRAPHICS.PRO` | 21,232 |
+| `HELP.COM` | `OTHER\OLDMSDOS\HELP.COM` | 429 |
+| `HELP.HLP` | `OTHER\OLDMSDOS\HELP.HLP` | 350,334 |
+| `INTERLNK.EXE` | `OTHER\OLDMSDOS\INTERLNK.EXE` | 17,709 |
+| `INTERSVR.EXE` | `OTHER\OLDMSDOS\INTERSVR.EXE` | 38,482 |
+| `LOADFIX.COM` | `OTHER\OLDMSDOS\LOADFIX.COM` | 1,273 |
+| `MEMMAKER.EXE` | `OTHER\OLDMSDOS\MEMMAKER.EXE` | 120,407 |
+| `MEMMAKER.HLP` | `OTHER\OLDMSDOS\MEMMAKER.HLP` | 19,748 |
+| `MEMMAKER.INF` | `OTHER\OLDMSDOS\MEMMAKER.INF` | 2,911 |
+| `MONOUMB.386` | `OTHER\OLDMSDOS\MONOUMB.386` | 8,783 |
+| `PRINT.EXE` | `OTHER\OLDMSDOS\PRINT.EXE` | 15,976 |
+| `QBASIC.EXE` | `OTHER\OLDMSDOS\QBASIC.EXE` | 195,372 |
+| `QBASIC.HLP` | `OTHER\OLDMSDOS\QBASIC.HLP` | 146,989 |
+| `REPLACE.EXE` | `OTHER\OLDMSDOS\REPLACE.EXE` | 20,242 |
+| `RESTORE.EXE` | `OTHER\OLDMSDOS\RESTORE.EXE` | 38,566 |
+| `SIZER.EXE` | `OTHER\OLDMSDOS\SIZER.EXE` | 7,329 |
+| `TREE.COM` | `OTHER\OLDMSDOS\TREE.COM` | 7,018 |
+| `UNDELETE.EXE` | `OTHER\OLDMSDOS\UNDELETE.EXE` | 26,741 |
+| `MSBACKDB.OVL` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKDB.OVL` | 64,250 |
+| `MSBACKDR.OVL` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKDR.OVL` | 68,442 |
+| `MSBACKFB.OVL` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKFB.OVL` | 69,866 |
+| `MSBACKFR.OVL` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKFR.OVL` | 74,026 |
+| `MSBACKUP.EXE` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKUP.EXE` | 5,615 |
+| `MSBACKUP.HLP` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKUP.HLP` | 366,380 |
+| `MSBACKUP.OVL` | `OTHER\OLDMSDOS\MSBACKUP\MSBACKUP.OVL` | 134,432 |
+| `MSBCONFG.HLP` | `OTHER\OLDMSDOS\MSBACKUP\MSBCONFG.HLP` | 54,031 |
+| `MSBCONFG.OVL` | `OTHER\OLDMSDOS\MSBACKUP\MSBCONFG.OVL` | 47,338 |

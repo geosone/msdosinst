@@ -1,20 +1,28 @@
 <#
 .SYNOPSIS
     Builds an MS-DOS installation disk set (1.44 MB floppy images) with the
-    GeosOne DOS Installer from the files of your own MS-DOS disks.
+    GeosOne DOS Installer from your own CDs and MS-DOS disks.
 
 .DESCRIPTION
-    You copy the files of your MS-DOS disks into a folder; this script
+    You put your CDs and disks (their files, or images: *.iso, *.img, also
+    packed in *.7z) into a folder; this script
     expands and compresses them into a GDA archive and writes bootable
     floppy images: disk 1 boots and starts INSTALL.EXE, which partitions
     and formats the hard disk if needed, installs MS-DOS and then offers to
     install further software from other disks (their INSTALL.INI).
 
     The script contains no Microsoft files.  You need your own, licensed
-    copy of the MS-DOS disks.  -List shows the files the set needs.
+    copy of the CDs and disks.  -List shows the files the set needs.
 
 .PARAMETER Source
-    Folder with the files of your disks (subfolders are searched too).
+    Folder with your CDs and disks (subfolders are searched too): their
+    files, or CD images (*.iso), floppy images (*.img, *.ima) and 7-Zip
+    archives of them (*.7z).  Images are unpacked with 7-Zip (7z on the
+    PATH, or Program Files\7-Zip) into the folder -Cache.
+
+.PARAMETER Cache
+    Folder for the unpacked images (default: mkdosset-cache in the temp
+    folder).  It is kept, the next run uses it again.
 
 .PARAMETER Out
     Output folder for DISK1.IMG, DISK2.IMG, ... (default: .\out).
@@ -51,6 +59,7 @@
 [CmdletBinding()]
 param(
     [string]$Source,
+    [string]$Cache = (Join-Path ([IO.Path]::GetTempPath()) 'mkdosset-cache'),
     [string]$Out = (Join-Path (Get-Location) 'out'),
     [string]$Set = 'msdos71de',
     [switch]$List,
@@ -120,11 +129,67 @@ $groups = @(
     [pscustomobject]@{ Name = 'Setup programs'; From = $def.BootFrom; Files = $def.BootFiles; Optional = $false; Medium = $null }
 ) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional; Medium = $_.Medium } })
 
-# all files below $Source by name
+# --- images in -Source ----------------------------------------------------------
+
+# CD images (*.iso), floppy images (*.img, *.ima) and 7-Zip archives of them
+# (*.7z) are unpacked with 7-Zip into $Cache\<name>-<size>; of a CD only the
+# folders the set needs (those of the Media entries)
+$cdPatterns = @(foreach ($g in $groups) {
+    foreach ($e in $g.Files) {
+        $s = Get-Spec $e $g.Medium
+        if ($s.Medium -and $s.Path -match '\\') { ($s.Path -replace '\\[^\\]*$', '') + '\*' }
+    }
+}) + @(foreach ($k in $def.Media.Keys) { $def.Media[$k].Find }) | ForEach-Object { $_.Replace('\', '/') } | Select-Object -Unique
+
+function Get-SevenZip([string]$for) {
+    foreach ($c in '7z', '7zz', '7za') {
+        $cmd = Get-Command $c -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($cmd) { return $cmd.Source }
+    }
+    foreach ($p in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if ($p -and (Test-Path -LiteralPath (Join-Path $p '7-Zip\7z.exe'))) { return (Join-Path $p '7-Zip\7z.exe') }
+    }
+    throw "7-Zip is needed for $for (7z on the PATH or Program Files\7-Zip\7z.exe)"
+}
+
+function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
+    $len = $f.Length
+    if ($f.LinkTarget) { $len = (Get-Item -LiteralPath ([IO.Path]::Combine($f.DirectoryName, $f.LinkTarget))).Length }   # symbolic link
+    $d = Join-Path $into (('{0}-{1}' -f ($f.BaseName -replace '[^\w.-]', '_'), $len))
+    if (Test-Path -LiteralPath (Join-Path $d '.done')) { return $d }
+    if (Test-Path -LiteralPath $d) { Remove-Item -LiteralPath $d -Recurse -Force }
+    New-Item -ItemType Directory -Path $d | Out-Null
+    $7z = Get-SevenZip $f.Name
+    Write-Host "Unpacking $($f.Name) ..."
+    switch ($f.Extension.ToLowerInvariant()) {
+        '.7z' {
+            $log = & $7z x -y -r -ssc- "-o$d" $f.FullName '*.iso' '*.img' '*.ima' 2>&1
+            if ($LASTEXITCODE) { throw "7-Zip failed on $($f.FullName):`n$($log -join "`n")" }
+            foreach ($i in @(Get-ChildItem -LiteralPath $d -Recurse -File)) {
+                [void](Expand-SourceImage $i $d)
+                Remove-Item -LiteralPath $i.FullName
+            }
+            Get-ChildItem -LiteralPath $d -Directory | Where-Object { -not (Get-ChildItem -LiteralPath $_.FullName -Recurse -File) } |
+                Remove-Item -Recurse -Force
+        }
+        '.iso' { $log = & $7z x -y -ssc- "-o$d" $f.FullName $cdPatterns 2>&1 }
+        default { $log = & $7z x -y "-o$d" $f.FullName 2>&1 }
+    }
+    if ($LASTEXITCODE) { throw "7-Zip failed on $($f.FullName):`n$($log -join "`n")" }
+    New-Item -ItemType File -Path (Join-Path $d '.done') | Out-Null
+    return $d
+}
+
+# all files below $Source (and of its unpacked images) by name
 $index = @{}
 if ($Source) {
     if (-not (Test-Path -LiteralPath $Source -PathType Container)) { throw "Folder not found: $Source" }
-    foreach ($f in Get-ChildItem -LiteralPath $Source -Recurse -File) {
+    $files = @(Get-ChildItem -LiteralPath $Source -Recurse -File)
+    foreach ($i in @($files | Where-Object { $_.Extension -in '.7z', '.iso', '.img', '.ima' })) {
+        New-Item -ItemType Directory -Force -Path $Cache | Out-Null
+        $files += @(Get-ChildItem -LiteralPath (Expand-SourceImage $i $Cache) -Recurse -File)
+    }
+    foreach ($f in $files) {
         $k = $f.Name.ToUpperInvariant()
         if (-not $index.ContainsKey($k)) { $index[$k] = @() }
         $index[$k] += $f
@@ -132,8 +197,14 @@ if ($Source) {
 }
 
 function Find-SourceFile([string]$name) {
-    $hits = $index[$name.ToUpperInvariant()]
+    $hits = @($index[$name.ToUpperInvariant()] | Where-Object { $_ })
     if (-not $hits) { return $null }
+    if ($hits.Count -gt 1 -and $def.Media) {
+        # files of disks, not those of the CDs (e.g. EXPAND.EXE is on both)
+        $roots = @(@(foreach ($k in $def.Media.Keys) { Get-MediumRoot $k }) | Where-Object { $_ })
+        $own = @($hits | Where-Object { $p = $_.FullName; -not ($roots | Where-Object { $p.StartsWith($_ + [IO.Path]::DirectorySeparatorChar) }) })
+        if ($own) { $hits = $own }
+    }
     if ($hits.Count -gt 1) {
         $first = [Convert]::ToBase64String([IO.File]::ReadAllBytes($hits[0].FullName))
         foreach ($h in $hits[1..($hits.Count - 1)]) {
@@ -212,12 +283,12 @@ foreach ($g in $groups) {
 if ($List) {
     if ($Source) { Write-Host "`n+ = found in $Source, - = missing" }
     if ($def.Media) {
-        Write-Host "`nCDs: copy them (or the folders named above) into -Source, keeping the folders:"
+        Write-Host "`nCDs: put their images (*.iso, *.7z) into -Source, or copy them (or the folders named above), keeping the folders:"
         foreach ($k in $def.Media.Keys) { Write-Host ("  {0}: {1} (found by {2})" -f $k, $def.Media[$k].Name, $def.Media[$k].Find) }
     }
     return
 }
-if (-not $Source) { throw "-Source is needed (folder with the files of your disks); -List shows the files" }
+if (-not $Source) { throw "-Source is needed (folder with your CDs and disks); -List shows the files" }
 if ($missingRequired.Count) { throw ("Missing in {0}: {1}" -f $Source, ($missingRequired -join ', ')) }
 
 # files from CABs: cabextract (ext/small-io-sys/tools) on Linux, expand.exe

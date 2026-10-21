@@ -1,9 +1,10 @@
 # MS-DOS 7.1 (German) disk set: the files mkdosset.ps1 needs from your own
 # CDs and disks and where they go in the archive (see INSTALL.INI).
 #
-# Copy the CDs (or the folders named here) and the files of your disks into
-# one folder (subfolders are fine) and give it with -Source; mkdosset.ps1
-# -List shows this list.  Entries: NAME = a file of your disks, found by
+# Put the CD images (*.iso), the disk images (*.img) - or 7-Zip archives of
+# them - or copies of the CDs (or the folders named here) and the files of
+# your disks into one folder (subfolders are fine) and give it with -Source;
+# mkdosset.ps1 -List shows this list.  Entries: NAME = a file of your disks, found by
 # name; Medium:PATH = a file of a CD (Media), PATH from the CD root;
 # Medium:PATH\X.CAB>NAME = a file in a CAB of a CD.  Compressed files
 # (*.??_, SZDD/KWAJ) are expanded.
@@ -12,10 +13,13 @@
     Label  = 'MSDOS71'            # volume labels "MSDOS71 1", ...
     Keyboard = 'GR'               # KEYB on the setup disk
 
-    # the CDs: found in -Source by the file Find (path from the CD root)
+    # the CDs (and disks): found in -Source by the file Find (path from the root)
     Media = @{
         WinMe   = @{ Name = 'Windows ME CD (German)'; Find = 'WIN9X\WIN_19.CAB' }
         Win98se = @{ Name = 'Windows 98 SE CD (German)'; Find = 'WIN98\WIN98_25.CAB' }
+        Win95   = @{ Name = 'Windows 95 CD (German)'; Find = 'OTHER\OLDMSDOS\MEMMAKER.EXE' }
+        # the Supplemental Disk has another EXPAND.EXE (English)
+        Dos622  = @{ Name = 'MS-DOS 6.22 disk 1 (German)'; Find = 'DOSSETUP.INI' }
     }
 
     # disk 1: the MS-DOS 7.1 system files, the boot sector is written by
@@ -63,12 +67,12 @@
         # not in Windows 98/ME; SHARE for Windows 3.x (MS-DOS 7.1 has it built
         # in, SHARE.EXE only says so)
         @{ Name = 'MS-DOS 6.22'; From = 'MS-DOS 6.22 disks 1 and 2'; To = 'DOS'; Optional = $true
-           Files = @('EXPAND.EXE', 'POWER.EX_', 'SHARE.EX_') }
+           Files = @('Dos622:EXPAND.EXE', 'POWER.EX_', 'SHARE.EX_') }
         @{ Name = 'MS-DOS Shell'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\SHELL'; Optional = $true; KeepFirst = $true
            Files = @('DOSSHELL.CO_', 'DOSSHELL.EX_', 'DOSSHELL.HL_', 'DOSSWAP.EX_',
                      'VGA.GR_=DOSSHELL.GRB', 'EGA.IN_=DOSSHELL.INI', 'VGA.VI_=DOSSHELL.VID') }
         @{ Name = 'MS-DOS 5.0 utilities'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\DOS5'; Optional = $true; KeepFirst = $true
-           Files = @('ASSIGN.CO_', 'BACKUP.EX_', 'COMP.EX_', 'CV.COM', 'EDLIN.EX_', 'JOIN.EX_', '4201.CP_',
+           Files = @('ASSIGN.CO_', 'BACKUP.EX_', 'COMP.EX_', 'CV.COM', 'EDLIN.EXE', 'JOIN.EX_', '4201.CP_',
                      '4208.CP_', '5202.CP_', 'LCD.CP_', 'GORILLA.BA_', 'MONEY.BA_', 'NIBBLES.BA_', 'REMLINE.BA_',
                      'EXE2BIN.EX_', 'GRAFTABL.CO_', 'MIRROR.CO_', 'MSHERC.CO_', 'PRINTER.SY_', 'PRINTFIX.COM',
                      'COMMANDS.TX_') }
@@ -81,12 +85,19 @@
         @{ Name = 'MS-DOS 6.22 network files'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\NET'; Optional = $true; KeepFirst = $true
            Files = @('NET.1X_', 'NET.TX_', 'SETNAME.EX_', 'NETBEUI.DO_', 'NETWKSTA.1X_', 'NETWKSTA.2X_',
                      'REDIR.1X_', 'REDIR.2X_') }
-        @{ Name = 'MS-DOS utilities for Windows 95 (OLDMSDOS)'; From = 'Windows 95 CD, folder OTHER\OLDMSDOS'; To = 'OLD'; Optional = $true; KeepFirst = $true
-           Files = @('APPEND.EXE', 'CHKSTATE.SYS', 'GRAPHICS.COM', 'GRAPHICS.PRO', 'HELP.COM', 'HELP.HLP',
-                     'INTERLNK.EXE', 'INTERSVR.EXE', 'LOADFIX.COM', 'MEMMAKER.EXE', 'MEMMAKER.HLP', 'MEMMAKER.INF',
-                     'MONOUMB.386', 'PRINT.EXE', 'QBASIC.EXE', 'QBASIC.HLP', 'REPLACE.EXE', 'RESTORE.EXE',
-                     'SIZER.EXE', 'TREE.COM', 'UNDELETE.EXE', 'MSBACKDB.OVL', 'MSBACKDR.OVL', 'MSBACKFB.OVL',
-                     'MSBACKFR.OVL', 'MSBACKUP.EXE', 'MSBACKUP.HLP', 'MSBACKUP.OVL', 'MSBCONFG.HLP', 'MSBCONFG.OVL') }
+        @{ Name = 'MS-DOS utilities for Windows 95 (OLDMSDOS)'; From = 'Windows 95 CD, folder OTHER\OLDMSDOS'; Medium = 'Win95'; To = 'OLD'; Optional = $true; KeepFirst = $true
+           Files = @('OTHER\OLDMSDOS\APPEND.EXE', 'OTHER\OLDMSDOS\CHKSTATE.SYS', 'OTHER\OLDMSDOS\GRAPHICS.COM',
+                     'OTHER\OLDMSDOS\GRAPHICS.PRO', 'OTHER\OLDMSDOS\HELP.COM', 'OTHER\OLDMSDOS\HELP.HLP',
+                     'OTHER\OLDMSDOS\INTERLNK.EXE', 'OTHER\OLDMSDOS\INTERSVR.EXE', 'OTHER\OLDMSDOS\LOADFIX.COM',
+                     'OTHER\OLDMSDOS\MEMMAKER.EXE', 'OTHER\OLDMSDOS\MEMMAKER.HLP', 'OTHER\OLDMSDOS\MEMMAKER.INF',
+                     'OTHER\OLDMSDOS\MONOUMB.386', 'OTHER\OLDMSDOS\PRINT.EXE', 'OTHER\OLDMSDOS\QBASIC.EXE',
+                     'OTHER\OLDMSDOS\QBASIC.HLP', 'OTHER\OLDMSDOS\REPLACE.EXE', 'OTHER\OLDMSDOS\RESTORE.EXE',
+                     'OTHER\OLDMSDOS\SIZER.EXE', 'OTHER\OLDMSDOS\TREE.COM', 'OTHER\OLDMSDOS\UNDELETE.EXE',
+                     'OTHER\OLDMSDOS\MSBACKUP\MSBACKDB.OVL', 'OTHER\OLDMSDOS\MSBACKUP\MSBACKDR.OVL',
+                     'OTHER\OLDMSDOS\MSBACKUP\MSBACKFB.OVL', 'OTHER\OLDMSDOS\MSBACKUP\MSBACKFR.OVL',
+                     'OTHER\OLDMSDOS\MSBACKUP\MSBACKUP.EXE', 'OTHER\OLDMSDOS\MSBACKUP\MSBACKUP.HLP',
+                     'OTHER\OLDMSDOS\MSBACKUP\MSBACKUP.OVL', 'OTHER\OLDMSDOS\MSBACKUP\MSBCONFG.HLP',
+                     'OTHER\OLDMSDOS\MSBACKUP\MSBCONFG.OVL') }
     )
 
     # names of compressed files that do not store them (KWAJ files of the

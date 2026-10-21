@@ -20,13 +20,14 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux): clone with the submod
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
     .\mkdosset.ps1 -Source D:\dosfiles -Extra D:\ahciaspi
 
-1. Copy the German Windows ME CD (folders `WIN9X` and `TOOLS\OLDMSDOS`), the German Windows 98 SE CD (folder `WIN98`) and the files of your MS-DOS 6.22 disks, Supplemental Disk and the Windows 95 `OTHER\OLDMSDOS` folder into one folder (subfolders are fine; keep the folders of the CDs). **[FILES.md](FILES.md) lists every file the set needs, with its place on the CD (CAB) and its size** (`-List` shows the same). The script extracts the files from the CABs (cabextract on Linux - `ext\small-io-sys\tools`, `expand.exe` on Windows). `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
+1. Put your German Windows ME, Windows 98 SE and Windows 95 CDs and your MS-DOS 6.22 disks (with the Supplemental Disk) into one folder (subfolders are fine): as images (`*.iso`, `*.img`, or 7-Zip archives `*.7z` of them, e.g. `Windows ME.CD1.iso` and `Disk01.img` ... `Disk04 - Supplemental.img` - the script unpacks them with [7-Zip](https://www.7-zip.org/) into `-Cache` and keeps them there for the next run), or as files: the folders `WIN9X` and `TOOLS\OLDMSDOS` of the ME CD, `WIN98` of the 98 SE CD, `OTHER\OLDMSDOS` of the 95 CD (keep the folders) and the files of the disks (disk 1 in its own folder: the Supplemental Disk has another `EXPAND.EXE`). **[FILES.md](FILES.md) lists every file the set needs, with its place on the CD (CAB) and its size** (`-List` shows the same). The script extracts the files from the CABs (cabextract on Linux - `ext\small-io-sys\tools`, `expand.exe` on Windows). `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
 2. Run the script: it writes `out\DISK1.IMG` ... `DISK3.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 
 | Parameter | |
 |---|---|
-| `-Source` | folder with your CDs and the files of your disks |
+| `-Source` | folder with your CDs and disks (images, 7-Zip archives or files) |
+| `-Cache` | folder for the unpacked images (default `mkdosset-cache` in the temp folder) |
 | `-Out` | output folder (default `.\out`) |
 | `-Set` | disk set in `sets\` (default `msdos71de`) |
 | `-List` | only list the files the set needs |

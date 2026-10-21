@@ -2,12 +2,15 @@
 # sets\<set>\set.psd1; the sizes come from the same folder as for
 # mkdosset.ps1 -Source (CDs and the files of the disks; the sizes of files in
 # CABs are read from the CAB directory).
+# Images and archives in -Source (*.iso, *.img, *.7z) are read from the
+# folder that mkdosset.ps1 unpacked them to (-Cache, run mkdosset.ps1 first).
 #   tools/mkfilelist.ps1 -Source <folder with the files> [-Set msdos71de]
 # Lines between the title and the text of an existing FILES.md are kept.
 # Copyright (C) 2026 GeosOne.  GNU General Public License version 3.
 param(
     [Parameter(Mandatory = $true)][string]$Source,
     [string]$Set = 'msdos71de',
+    [string]$Cache = (Join-Path ([IO.Path]::GetTempPath()) 'mkdosset-cache'),
     [string]$Out = (Join-Path $PSScriptRoot '../FILES.md')
 )
 $ErrorActionPreference = 'Stop'
@@ -16,7 +19,11 @@ $inv = [Globalization.CultureInfo]::InvariantCulture
 $bt = [string][char]96   # backtick for Markdown code
 $sizes = @{}   # files of the disks by name
 $paths = @{}   # all files by full path (lower case)
-foreach ($f in Get-ChildItem -LiteralPath $Source -Recurse -File) {
+$files = @(Get-ChildItem -LiteralPath $Source -Recurse -File)
+if (($files | Where-Object { $_.Extension -in '.7z', '.iso', '.img', '.ima' }) -and (Test-Path -LiteralPath $Cache)) {
+    $files += @(Get-ChildItem -LiteralPath $Cache -Recurse -File)
+}
+foreach ($f in $files) {
     $sizes[$f.Name.ToUpperInvariant()] = $f.Length
     $paths[$f.FullName.Replace('\', '/').ToLowerInvariant()] = $f
 }
@@ -78,8 +85,9 @@ if (Test-Path -LiteralPath $Out) {
         if ($keep.Count) { foreach ($l in $keep) { $o.Add($l) }; $o.Add('') }
     }
 }
-$o.Add('Copy the CDs (or the folders named below) and the files of your disks from **your own** media into one folder ' +
-    '(subfolders are fine) and run ' + $bt + '.\mkdosset.ps1 -Source <folder>' + $bt + '. ' +
+$o.Add('Put **your own** media into one folder (subfolders are fine): the CD images (' + $bt + '*.iso' + $bt + '), the disk images (' +
+    $bt + '*.img' + $bt + ') or 7-Zip archives of them (' + $bt + '*.7z' + $bt + ') as they are - the script unpacks them with 7-Zip - ' +
+    'or copies of the CDs (or the folders named below) and the files of your disks. Then run ' + $bt + '.\mkdosset.ps1 -Source <folder>' + $bt + '. ' +
     $bt + '.\mkdosset.ps1 -List -Source <folder>' + $bt + ' shows which of them are still missing.')
 $o.Add('')
 $o.Add('- Files of a CD are found by their place on the CD (keep its folders); ' + $bt + 'X.CAB > NAME' + $bt +
