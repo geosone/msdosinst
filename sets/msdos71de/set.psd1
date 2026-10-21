@@ -1,39 +1,69 @@
 # MS-DOS 7.1 (German) disk set: the files mkdosset.ps1 needs from your own
-# disks and where they go in the archive (see INSTALL.INI).
+# CDs and disks and where they go in the archive (see INSTALL.INI).
 #
-# Copy the files of your disks into one folder (subfolders are fine) and
-# give it with -Source; mkdosset.ps1 -List shows this list.  File names as
-# on the disks; compressed files (*.??_, SZDD/KWAJ) are expanded.
+# Copy the CDs (or the folders named here) and the files of your disks into
+# one folder (subfolders are fine) and give it with -Source; mkdosset.ps1
+# -List shows this list.  Entries: NAME = a file of your disks, found by
+# name; Medium:PATH = a file of a CD (Media), PATH from the CD root;
+# Medium:PATH\X.CAB>NAME = a file in a CAB of a CD.  Compressed files
+# (*.??_, SZDD/KWAJ) are expanded.
 @{
     Name   = 'MSDOS71'            # archive MSDOS71.D01, MSDOS71.D02, ...
     Label  = 'MSDOS71'            # volume labels "MSDOS71 1", ...
     Keyboard = 'GR'               # KEYB on the setup disk
 
+    # the CDs: found in -Source by the file Find (path from the CD root)
+    Media = @{
+        WinMe   = @{ Name = 'Windows ME CD (German)'; Find = 'WIN9X\WIN_19.CAB' }
+        Win98se = @{ Name = 'Windows 98 SE CD (German)'; Find = 'WIN98\WIN98_25.CAB' }
+    }
+
     # disk 1: the MS-DOS 7.1 system files, the boot sector is written by
-    # mkdosset.ps1.  IO.SYS is built by ext/small-io-sys (compile.sh de) from
+    # mkdosset.ps1.  IO.SYS is built by ext/small-io-sys (compile.ps1 de) from
     # winboot.sys of the Windows 98 SE CD, COMMAND.COM is the one of the same
     # CD (see Patches); both are in WIN98\PRECOPY1.CAB, continued in
-    # PRECOPY2.CAB.  MSDOS.SYS is MsdosSys, SYS.COM comes from the system disk.
-    System     = @('IO.SYS', 'MSDOS.SYS', 'COMMAND.COM', 'SYS.COM')
-    SystemFrom = 'MS-DOS 7.1 system disk "W98_de" (Win98_System_deutsch.IMG)'
-    IoSysCabs  = @('PRECOPY1.CAB', 'PRECOPY2.CAB')
-    IoSysFrom  = 'Windows 98 SE CD, folder WIN98'
-    # the options that the IO.SYS of the system disk had built in
+    # PRECOPY2.CAB.  MSDOS.SYS is MsdosSys.  SYS.COM is the Windows 98 SE one
+    # (the Windows ME SYS.COM installs only Windows ME system files).
+    System     = @('IO.SYS', 'MSDOS.SYS', 'COMMAND.COM', 'Win98se:WIN98\EBD.CAB>SYS.COM')
+    SystemFrom = 'Windows 98 SE CD'
+    IoSysCabs  = @('Win98se:WIN98\PRECOPY1.CAB', 'Win98se:WIN98\PRECOPY2.CAB')
+    IoSysFrom  = 'Windows 98 SE CD'
+    # the options that the IO.SYS of the MS-DOS 7.1 system disk had built in
     MsdosSys   = @('[Options]', 'BootKeys=0', 'Logo=0', 'DblSpace=0', 'DrvSpace=0', 'SystemReg=0')
-    BootFiles  = @('FDISK.EXE', 'FORMAT.COM', 'KEYB.COM', 'KEYBOARD.SYS', 'KEYBRD2.SYS')
-    BootFrom   = 'MS-DOS 7.1 disk 1'
+    # Windows ME FDISK and FORMAT (see Patches); Windows ME has no KEYB.COM
+    BootFiles  = @('WinMe:WIN9X\BASE2.CAB>FDISK.EXE', 'WinMe:WIN9X\WIN_9.CAB>FORMAT.COM', 'Win98se:WIN98\WIN98_25.CAB>KEYB.COM',
+                   'WinMe:WIN9X\WIN_19.CAB>KEYBOARD.SYS', 'WinMe:WIN9X\WIN_19.CAB>KEYBRD2.SYS')
+    BootFrom   = 'Windows ME CD, Windows 98 SE CD'
 
-    # archive: Files (as on the disks), Zip = self-extracting ZIP archive,
-    # To = directory in the archive, Optional = may be missing,
-    # KeepFirst = leave out names that are already in DOS\,
-    # "A=B" = store file A (after expanding) as B
+    # archive: Files (as above; Medium = the CD of entries without one),
+    # Zip = self-extracting ZIP archive, To = directory in the archive,
+    # Optional = may be missing, KeepFirst = leave out names that are
+    # already in DOS\, "A=B" = store file A (after expanding) as B
     Archive = @(
-        @{ Name = 'MS-DOS 7.1 (disks 1-4)'; From = 'MS-DOS 7.1 disks 1-4'; To = 'DOS'; Zip = $true
-           Files = @('DISK1.EXE', 'DISK2.EXE', 'DISK3.EXE', 'DISK4.EXE') }
-        @{ Name = 'MS-DOS 7.1 (disk 4)'; From = 'MS-DOS 7.1 disk 4'; To = 'DOS'
-           Files = @('POWER.EX_', 'PRINT.EX_', 'SETVER.EX_', 'SHARE.EX_') }
-        @{ Name = 'Logo'; From = 'MS-DOS 7.1 disk 1'; To = 'ROOT'; Optional = $true
-           Files = @('LOGO.SY_') }
+        @{ Name = 'MS-DOS 7.1 programs (Windows ME)'; From = 'Windows ME CD, folders WIN9X and TOOLS\OLDMSDOS'; Medium = 'WinMe'; To = 'DOS'
+           Files = @('WIN9X\WIN_19.CAB>ANSI.SYS', 'WIN9X\WIN_19.CAB>COUNTRY.SYS', 'WIN9X\WIN_19.CAB>DISPLAY.SYS',
+                     'WIN9X\WIN_19.CAB>HIMEM.SYS',
+                     'WIN9X\WIN_16.CAB>ATTRIB.EXE', 'WIN9X\WIN_16.CAB>CHKDSK.EXE', 'WIN9X\WIN_16.CAB>DEBUG.EXE',
+                     'WIN9X\WIN_16.CAB>DELTREE.EXE', 'WIN9X\WIN_16.CAB>EMM386.EXE', 'WIN9X\WIN_16.CAB>FC.EXE',
+                     'WIN9X\WIN_16.CAB>FIND.EXE', 'WIN9X\WIN_16.CAB>IEXTRACT.EXE', 'WIN9X\WIN_16.CAB>LABEL.EXE',
+                     'WIN9X\WIN_16.CAB>MEM.EXE', 'WIN9X\WIN_16.CAB>MOVE.EXE',
+                     'WIN9X\WIN_9.CAB>CHOICE.COM', 'WIN9X\WIN_9.CAB>DISKCOPY.COM', 'WIN9X\WIN_9.CAB>DOSKEY.COM',
+                     'WIN9X\WIN_9.CAB>EDIT.COM', 'WIN9X\WIN_9.CAB>EGA.CPI', 'WIN9X\WIN_9.CAB>MODE.COM', 'WIN9X\WIN_9.CAB>MORE.COM',
+                     'WIN9X\WIN_17.CAB>SCANDISK.EXE', 'WIN9X\WIN_17.CAB>SETVER.EXE', 'WIN9X\WIN_17.CAB>SORT.EXE',
+                     'WIN9X\WIN_17.CAB>SUBST.EXE', 'WIN9X\WIN_17.CAB>XCOPY.EXE', 'WIN9X\WIN_17.CAB>XCOPY32.EXE',
+                     'WIN9X\WIN_18.CAB>EDIT.HLP', 'WIN9X\WIN_18.CAB>SCANDISK.INI', 'WIN9X\WIN_18.CAB>XCOPY32.MOD',
+                     'WIN9X\PRECOPY1.CAB>DRVSPACE.BIN', 'WIN9X\PRECOPY1.CAB>DRVSPACE.SYS', 'WIN9X\PRECOPY1.CAB>SCANREG.EXE',
+                     'WIN9X\BASE2.CAB>MSCDEX.EXE', 'WIN9X\BASE2.CAB>ASPI2DOS.SYS', 'WIN9X\BASE2.CAB>ASPI4DOS.SYS',
+                     'WIN9X\BASE2.CAB>ASPI8DOS.SYS', 'WIN9X\BASE2.CAB>ASPI8U2.SYS', 'WIN9X\BASE2.CAB>ASPICD.SYS',
+                     'WIN9X\BASE2.CAB>BTCDROM.SYS', 'WIN9X\BASE2.CAB>BTDOSM.SYS', 'WIN9X\BASE2.CAB>OAKCDROM.SYS',
+                     'WIN9X\EXTRACT.EXE', 'WIN9X\SMARTDRV.EXE',
+                     'TOOLS\OLDMSDOS\HELP.COM', 'TOOLS\OLDMSDOS\MSD.EXE', 'TOOLS\OLDMSDOS\QBASIC.EXE', 'TOOLS\OLDMSDOS\QBASIC.HLP') }
+        @{ Name = 'MS-DOS 7.1 programs (Windows 98 SE)'; From = 'Windows 98 SE CD, folder WIN98 (not in Windows ME)'; Medium = 'Win98se'; To = 'DOS'
+           Files = @('WIN98\WIN98_44.CAB>NLSFUNC.EXE', 'WIN98\EBD.CAB>EXT.EXE') }
+        # not in Windows 98/ME; SHARE for Windows 3.x (MS-DOS 7.1 has it built
+        # in, SHARE.EXE only says so)
+        @{ Name = 'MS-DOS 6.22'; From = 'MS-DOS 6.22 disks 1 and 2'; To = 'DOS'; Optional = $true
+           Files = @('EXPAND.EXE', 'POWER.EX_', 'SHARE.EX_') }
         @{ Name = 'MS-DOS Shell'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\SHELL'; Optional = $true; KeepFirst = $true
            Files = @('DOSSHELL.CO_', 'DOSSHELL.EX_', 'DOSSHELL.HL_', 'DOSSWAP.EX_',
                      'VGA.GR_=DOSSHELL.GRB', 'EGA.IN_=DOSSHELL.INI', 'VGA.VI_=DOSSHELL.VID') }
@@ -66,18 +96,97 @@
                      '2X_' = '2XE'; 'DO_' = 'DOS' }
     ExpandNames = @{ 'DRVBOOT.BA_' = 'DRVBOOT.BAT' }
 
-    # version checks of the MS-DOS 6.22 programs (Supplemental Disk and the
-    # OLDMSDOS utilities of Windows 95): they accept only MS-DOS 6.22
-    # (CMP AX,1606h) resp. 6.20-6.x (AM.EXE, INT 21h AX=3306h) and are
-    # patched to accept MS-DOS 7.10; each byte string must occur exactly once
+    # Patches: Old/New in hex or OldText/NewText (code page 850), at offset
+    # At or where Old occurs exactly once (Count = that many times, all)
     Patches = @(
+        # version checks of the MS-DOS 6.22 programs (disks, Supplemental Disk
+        # and the OLDMSDOS utilities of Windows 95): they accept only MS-DOS 6.22
+        # (CMP AX,1606h) resp. 6.20-6.x (AM.EXE, INT 21h AX=3306h) and are
+        # patched to accept MS-DOS 7.10
         @{ Files = @('APPEND.EXE', 'ASSIGN.COM', 'BACKUP.EXE', 'EDLIN.EXE', 'EXE2BIN.EXE', 'GRAFTABL.COM',
-                     'GRAPHICS.COM', 'JOIN.EXE', 'REPLACE.EXE', 'RESTORE.EXE', 'TREE.COM')
+                     'GRAPHICS.COM', 'JOIN.EXE', 'PRINT.EXE', 'REPLACE.EXE', 'RESTORE.EXE', 'SHARE.EXE', 'TREE.COM')
            Old = 'B4 30 CD 21 3D 06 16 75 03'; New = 'B4 30 CD 21 3D 07 0A 75 03' }
         @{ Files = @('APPEND.EXE')
            Old = 'B4 30 E8 CF FD 3D 06 16 75 02'; New = 'B4 30 E8 CF FD 3D 07 0A 75 02' }
         @{ Files = @('AM.EXE')
            Old = '80 7E E6 06 75 06 80 7E E7 14'; New = '80 7E E6 07 75 06 80 7E E7 0A' }
+
+        # version checks of the Windows ME programs: they accept only MS-DOS
+        # 8.00 (CMP AX,0008h resp. 0800h) and are patched to accept 7.10
+        @{ Files = @('ANSI.SYS', 'ATTRIB.EXE', 'CHKDSK.EXE', 'DEBUG.EXE', 'DISKCOPY.COM', 'DISPLAY.SYS', 'DOSKEY.COM',
+                     'FC.EXE', 'FIND.EXE', 'FORMAT.COM', 'LABEL.EXE', 'MEM.EXE', 'MODE.COM', 'MORE.COM', 'SETVER.EXE',
+                     'SORT.EXE', 'SUBST.EXE', 'XCOPY.EXE', 'XCOPY32.EXE', 'XCOPY32.MOD')
+           Old = 'B4 30 CD 21 3D 08 00 74'; New = 'B4 30 CD 21 3D 07 0A 74' }
+        @{ Files = @('DOSKEY.COM'); Old = 'CD 21 86 C4 3D 00 08 74'; New = 'CD 21 86 C4 3D 0A 07 74' }
+
+        # Windows ME FORMAT.COM: the size of the medium in MB is computed in 32
+        # bits but stored in 16 ("Formatierung 16,859,84 MB" for 82,396 MB).
+        # The size code stores the whole 32-bit value at [3203h] (shorter: mov
+        # eax,[2C96h] instead of two 16-bit loads), the hundredths move from
+        # [3205h] to [3201h] (only used for sizes below 1 MB), the two message
+        # arguments of the MB value become 32 bits (and up to 7 digits)
+        @{ Files = @('FORMAT.COM'); At = 0x746E
+           Old = '66 0F B7 C9 A1 98 2C 66 C1 E0 10 A1 96 2C 66 F7 E1 66 BB 00 00 10 00 66 F7 F3 66 C1 EA 0A EB 4C'
+           New = '66 A1 96 2C 66 0F B7 C9 66 F7 E1 66 BB 00 00 10 00 66 F7 F3 66 A3 03 32 66 C1 EA 0A EB 4E 90 90' }
+        @{ Files = @('FORMAT.COM'); At = 0x751F; Old = 'A3 05 32'; New = 'A3 01 32' }
+        @{ Files = @('FORMAT.COM'); At = 0x7529; Old = '89 0E 05 32'; New = '89 0E 01 32' }
+        @{ Files = @('FORMAT.COM'); At = 0x382; Old = '0B 00 03 32 08 00 01 A1 05 05'; New = '0B 00 03 32 08 00 01 B1 07 05' }
+        @{ Files = @('FORMAT.COM'); At = 0x38D; Old = '0B 00 03 32 08 00 01 A1 0D 00'; New = '0B 00 03 32 08 00 01 B1 0D 00' }
+        @{ Files = @('FORMAT.COM'); At = 0x398; Old = '0B 00 05 32'; New = '0B 00 01 32' }
+
+        # Windows ME FDISK.EXE: sizes of 100,000 MB and more with 6 digits, as
+        # in the FDISK.EXE (KB263044) fixed by Petr (MSFN, "Corrected FDISK
+        # and FORMAT", 2006); the Windows ME FDISK has the same code, its data
+        # is 10h higher
+        # the 6th character of the input field (a word instead of a byte)
+        @{ Files = @('FDISK.EXE'); At = 0x7C27; Old = '8A 46 E4 88 87 10 9E'; New = '8B 46 E4 89 87 10 9E' }
+        # limit of the short input field 10,000 -> 100,000 (one 32-bit compare)
+        @{ Files = @('FDISK.EXE'); At = 0x816E; Old = '83 7E FC 00 75 07 81 7E FA 10 27 72 03'; New = '90 90 90 66 81 7E FA A0 86 01 00 72 03' }
+        @{ Files = @('FDISK.EXE'); At = 0x82C7; Old = '83 7E FC 00 75 48 81 7E FA 10 27 73 41'; New = '90 90 90 66 81 7E FA A0 86 01 00 73 41' }
+        # larger line buffers
+        @{ Files = @('FDISK.EXE'); At = 0x8D48; Old = 'C7 06 5E 12 C0 9E'; New = 'C7 06 5E 12 C6 9E' }
+        @{ Files = @('FDISK.EXE'); At = 0x8D5B; Old = 'C7 06 5E 12 74 9F'; New = 'C7 06 5E 12 80 9F' }
+        @{ Files = @('FDISK.EXE'); At = 0x8D6E; Old = 'C7 06 5E 12 28 A0'; New = 'C7 06 5E 12 3A A0' }
+        @{ Files = @('FDISK.EXE'); At = 0x9001; Old = 'C7 06 5E 12 94 9E'; New = 'C7 06 5E 12 A4 9E' }
+        @{ Files = @('FDISK.EXE'); At = 0x9014; Old = 'C7 06 5E 12 1C 9F'; New = 'C7 06 5E 12 3C 9F' }
+        @{ Files = @('FDISK.EXE'); At = 0x9027; Old = 'C7 06 5E 12 A4 9F'; New = 'C7 06 5E 12 D4 9F' }
+        # both logical drive lines use the first (widened) format string
+        @{ Files = @('FDISK.EXE'); At = 0x8EA2; Old = '50 6A 20 68 D1 11'; New = '50 6A 20 68 C1 11' }
+        # format strings
+        @{ Files = @('FDISK.EXE'); At = 0xE17E; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE185; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE18C; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE193; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE19A; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1A1; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1A8; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1B6; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1BD; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1C4; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1D2; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1E3; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1EA; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE1F8; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xE20A; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEB8C; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEB9C; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEBDC; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEBFC; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEC19; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEC1F; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEC33; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        @{ Files = @('FDISK.EXE'); At = 0xEC39; Old = '25 39 63 00 25'; New = '25 31 30 63 00' }
+        @{ Files = @('FDISK.EXE'); At = 0xEC43; OldText = '%5.0lu'; NewText = '%6.0lu' }
+        # screen texts: number fields one character wider, the texts keep their length
+        @{ Files = @('FDISK.EXE'); Count = 4; OldText = '<IIIII>   <IIIIIIII>   <IIII>'; NewText = '<IIIIII>   <IIIIIIII>  <IIII>' }
+        @{ Files = @('FDISK.EXE'); Count = 23; OldText = '<IIIII>  <IIIIIIII>  <IIII>'; NewText = '<IIIIII>  <IIIIIIII> <IIII>' }
+        @{ Files = @('FDISK.EXE'); Count = 32; OldText = '<IIIII>   <IIIII>    <IIII>'; NewText = '<IIIIII>  <IIIIII>   <IIII>' }
+        @{ Files = @('FDISK.EXE'); Count = 2; OldText = ': <HIIIIIR> MB (1'; NewText = ':<HIIIIIIR> MB (1' }
+        @{ Files = @('FDISK.EXE'); OldText = 'Partition: <HIIIIIR>'; NewText = 'Partition:<HIIIIIIR>' }
+        @{ Files = @('FDISK.EXE'); OldText = 'maximal <HIIIIIR>'; NewText = 'maximal<HIIIIIIR>' }
+        @{ Files = @('FDISK.EXE'); OldText = '..: <H>[<IIIISI>]'; NewText = '.: <H>[<IIIIISI>]' }
+        @{ Files = @('FDISK.EXE'); OldText = 'Platzes: <H>[<IIIISI>]'; NewText = 'Platzes:<H>[<IIIIISI>]' }
+        @{ Files = @('FDISK.EXE'); OldText = '....<H>[<IIIISI>]'; NewText = '...<H>[<IIIIISI>]' }
 
         # COMMAND.COM of the German Windows 98 SE CD (96370 bytes): MS-DOS 7.1
         # instead of Windows 98, as on the MS-DOS 7.1 system disk

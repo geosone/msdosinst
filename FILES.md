@@ -5,66 +5,124 @@
  https://archive.org/details/msdos_6.22_de
  olddos https://winworldpc.com/product/windows-95/rtm
 
-Copy these files from **your own** disks into one folder (subfolders are fine) and run `.\mkdosset.ps1 -Source <folder>`. `.\mkdosset.ps1 -List -Source <folder>` shows which of them are still missing.
+Copy the CDs (or the folders named below) and the files of your disks from **your own** media into one folder (subfolders are fine) and run `.\mkdosset.ps1 -Source <folder>`. `.\mkdosset.ps1 -List -Source <folder>` shows which of them are still missing.
 
-- File names as on the disks: compressed files (`*.??_`) are taken as they are, the script expands them.
-- A file name must occur only once: take `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM` and `SYS.COM` from the MS-DOS 7.1 system disk, **not** the older ones of disk 1.
+- Files of a CD are found by their place on the CD (keep its folders); `X.CAB > NAME` = the file NAME in that CAB, the script extracts it (the other CABs of the CD must be in the same folder, a file can continue in the next CAB). The size is that of the extracted file.
+- Files of the disks are found by name: compressed files (`*.??_`) are taken as they are, the script expands them.
+- `IO.SYS` is built from `WINBOOT.SYS` in `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD, `COMMAND.COM` is taken from them, `MSDOS.SYS` is written by the script; patched programs: see `Patches` in `sets\msdos71de\set.psd1`.
 - Optional groups may be missing; the setup then leaves out that part.
-- `DISK1.EXE` ... `DISK4.EXE` are self-extracting ZIP archives; the script unpacks them.
-- The sizes are those of the German MS-DOS 7.1 set the project was tested with; other versions may work but are untested.
+- The sizes are those of the German media the project was tested with; other versions may work but are untested.
+
+## CDs
+
+| Name | Found by |
+|---|---|
+| Windows 98 SE CD (German) | `WIN98\WIN98_25.CAB` |
+| Windows ME CD (German) | `WIN9X\WIN_19.CAB` |
 
 ## System files
 
-From: MS-DOS 7.1 system disk "W98_de" (Win98_System_deutsch.IMG)
+From: Windows 98 SE CD
 
-| File | Size (bytes) |
-|---|---:|
-| `IO.SYS` | 76,036 |
-| `MSDOS.SYS` | 2 |
-| `COMMAND.COM` | 96,370 |
-| `SYS.COM` | 19,143 |
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `SYS.COM` | `WIN98\EBD.CAB > SYS.COM` | 19,143 |
+
+## IO.SYS and COMMAND.COM
+
+From: Windows 98 SE CD
+
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `PRECOPY1.CAB` | `WIN98\PRECOPY1.CAB` | 1,331,200 |
+| `PRECOPY2.CAB` | `WIN98\PRECOPY2.CAB` | 1,325,423 |
 
 ## Setup programs
 
-From: MS-DOS 7.1 disk 1
+From: Windows ME CD, Windows 98 SE CD
+
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `FDISK.EXE` | `WIN9X\BASE2.CAB > FDISK.EXE` | 67,116 |
+| `FORMAT.COM` | `WIN9X\WIN_9.CAB > FORMAT.COM` | 51,031 |
+| `KEYB.COM` | `WIN98\WIN98_25.CAB > KEYB.COM` | 20,023 |
+| `KEYBOARD.SYS` | `WIN9X\WIN_19.CAB > KEYBOARD.SYS` | 34,566 |
+| `KEYBRD2.SYS` | `WIN9X\WIN_19.CAB > KEYBRD2.SYS` | 31,942 |
+
+## MS-DOS 7.1 programs (Windows ME)
+
+From: Windows ME CD, folders WIN9X and TOOLS\OLDMSDOS
+
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `ANSI.SYS` | `WIN9X\WIN_19.CAB > ANSI.SYS` | 9,751 |
+| `COUNTRY.SYS` | `WIN9X\WIN_19.CAB > COUNTRY.SYS` | 30,742 |
+| `DISPLAY.SYS` | `WIN9X\WIN_19.CAB > DISPLAY.SYS` | 13,223 |
+| `HIMEM.SYS` | `WIN9X\WIN_19.CAB > HIMEM.SYS` | 32,823 |
+| `ATTRIB.EXE` | `WIN9X\WIN_16.CAB > ATTRIB.EXE` | 15,460 |
+| `CHKDSK.EXE` | `WIN9X\WIN_16.CAB > CHKDSK.EXE` | 28,848 |
+| `DEBUG.EXE` | `WIN9X\WIN_16.CAB > DEBUG.EXE` | 21,098 |
+| `DELTREE.EXE` | `WIN9X\WIN_16.CAB > DELTREE.EXE` | 19,147 |
+| `EMM386.EXE` | `WIN9X\WIN_16.CAB > EMM386.EXE` | 126,695 |
+| `FC.EXE` | `WIN9X\WIN_16.CAB > FC.EXE` | 20,910 |
+| `FIND.EXE` | `WIN9X\WIN_16.CAB > FIND.EXE` | 6,738 |
+| `IEXTRACT.EXE` | `WIN9X\WIN_16.CAB > IEXTRACT.EXE` | 17,655 |
+| `LABEL.EXE` | `WIN9X\WIN_16.CAB > LABEL.EXE` | 9,548 |
+| `MEM.EXE` | `WIN9X\WIN_16.CAB > MEM.EXE` | 32,450 |
+| `MOVE.EXE` | `WIN9X\WIN_16.CAB > MOVE.EXE` | 27,571 |
+| `CHOICE.COM` | `WIN9X\WIN_9.CAB > CHOICE.COM` | 5,431 |
+| `DISKCOPY.COM` | `WIN9X\WIN_9.CAB > DISKCOPY.COM` | 22,279 |
+| `DOSKEY.COM` | `WIN9X\WIN_9.CAB > DOSKEY.COM` | 15,783 |
+| `EDIT.COM` | `WIN9X\WIN_9.CAB > EDIT.COM` | 70,974 |
+| `EGA.CPI` | `WIN9X\WIN_9.CAB > EGA.CPI` | 58,870 |
+| `MODE.COM` | `WIN9X\WIN_9.CAB > MODE.COM` | 29,783 |
+| `MORE.COM` | `WIN9X\WIN_9.CAB > MORE.COM` | 10,487 |
+| `SCANDISK.EXE` | `WIN9X\WIN_17.CAB > SCANDISK.EXE` | 249,932 |
+| `SETVER.EXE` | `WIN9X\WIN_17.CAB > SETVER.EXE` | 19,131 |
+| `SORT.EXE` | `WIN9X\WIN_17.CAB > SORT.EXE` | 26,778 |
+| `SUBST.EXE` | `WIN9X\WIN_17.CAB > SUBST.EXE` | 17,968 |
+| `XCOPY.EXE` | `WIN9X\WIN_17.CAB > XCOPY.EXE` | 3,910 |
+| `XCOPY32.EXE` | `WIN9X\WIN_17.CAB > XCOPY32.EXE` | 3,910 |
+| `EDIT.HLP` | `WIN9X\WIN_18.CAB > EDIT.HLP` | 12,780 |
+| `SCANDISK.INI` | `WIN9X\WIN_18.CAB > SCANDISK.INI` | 8,822 |
+| `XCOPY32.MOD` | `WIN9X\WIN_18.CAB > XCOPY32.MOD` | 41,984 |
+| `DRVSPACE.BIN` | `WIN9X\PRECOPY1.CAB > DRVSPACE.BIN` | 69,079 |
+| `DRVSPACE.SYS` | `WIN9X\PRECOPY1.CAB > DRVSPACE.SYS` | 2,151 |
+| `SCANREG.EXE` | `WIN9X\PRECOPY1.CAB > SCANREG.EXE` | 173,246 |
+| `MSCDEX.EXE` | `WIN9X\BASE2.CAB > MSCDEX.EXE` | 25,473 |
+| `ASPI2DOS.SYS` | `WIN9X\BASE2.CAB > ASPI2DOS.SYS` | 35,330 |
+| `ASPI4DOS.SYS` | `WIN9X\BASE2.CAB > ASPI4DOS.SYS` | 14,386 |
+| `ASPI8DOS.SYS` | `WIN9X\BASE2.CAB > ASPI8DOS.SYS` | 37,564 |
+| `ASPI8U2.SYS` | `WIN9X\BASE2.CAB > ASPI8U2.SYS` | 44,828 |
+| `ASPICD.SYS` | `WIN9X\BASE2.CAB > ASPICD.SYS` | 29,606 |
+| `BTCDROM.SYS` | `WIN9X\BASE2.CAB > BTCDROM.SYS` | 21,971 |
+| `BTDOSM.SYS` | `WIN9X\BASE2.CAB > BTDOSM.SYS` | 30,955 |
+| `OAKCDROM.SYS` | `WIN9X\BASE2.CAB > OAKCDROM.SYS` | 41,302 |
+| `EXTRACT.EXE` | `WIN9X\EXTRACT.EXE` | 53,767 |
+| `SMARTDRV.EXE` | `WIN9X\SMARTDRV.EXE` | 45,379 |
+| `HELP.COM` | `TOOLS\OLDMSDOS\HELP.COM` | 429 |
+| `MSD.EXE` | `TOOLS\OLDMSDOS\MSD.EXE` | 166,023 |
+| `QBASIC.EXE` | `TOOLS\OLDMSDOS\QBASIC.EXE` | 195,372 |
+| `QBASIC.HLP` | `TOOLS\OLDMSDOS\QBASIC.HLP` | 146,989 |
+
+## MS-DOS 7.1 programs (Windows 98 SE)
+
+From: Windows 98 SE CD, folder WIN98 (not in Windows ME)
+
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `NLSFUNC.EXE` | `WIN98\WIN98_44.CAB > NLSFUNC.EXE` | 7,020 |
+| `EXT.EXE` | `WIN98\EBD.CAB > EXT.EXE` | 13,299 |
+
+## MS-DOS 6.22 (optional)
+
+From: MS-DOS 6.22 disks 1 and 2
 
 | File | Size (bytes) |
 |---|---:|
-| `FDISK.EXE` | 64,108 |
-| `FORMAT.COM` | 51,111 |
-| `KEYB.COM` | 20,023 |
-| `KEYBOARD.SYS` | 34,566 |
-| `KEYBRD2.SYS` | 31,942 |
-
-## MS-DOS 7.1 (disks 1-4)
-
-From: MS-DOS 7.1 disks 1-4
-
-| File | Size (bytes) |
-|---|---:|
-| `DISK1.EXE` | 522,866 |
-| `DISK2.EXE` | 522,775 |
-| `DISK3.EXE` | 977,989 |
-| `DISK4.EXE` | 641,951 |
-
-## MS-DOS 7.1 (disk 4)
-
-From: MS-DOS 7.1 disk 4
-
-| File | Size (bytes) |
-|---|---:|
-| `POWER.EX_` | 6,397 |
-| `PRINT.EX_` | 11,056 |
-| `SETVER.EX_` | 10,784 |
-| `SHARE.EX_` | 3,182 |
-
-## Logo (optional)
-
-From: MS-DOS 7.1 disk 1
-
-| File | Size (bytes) |
-|---|---:|
-| `LOGO.SY_` | 44,432 |
+| `EXPAND.EXE` | 16,365 |
+| `POWER.EX_` | 5,624 |
+| `SHARE.EX_` | 8,191 |
 
 ## MS-DOS Shell (optional)
 

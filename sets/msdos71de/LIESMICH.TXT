@@ -17,6 +17,14 @@ Installation
    einer INSTALL.INI einlegen (z. B. AHCIASPI, EUSBASPI) und
    "Installieren" wählen.
 
+Programme
+---------
+
+MS-DOS 7.1 aus Windows 98 SE mit den neuesten MS-DOS-Programmen aus
+Windows ME (FDISK und FORMAT zeigen auch Festplatten über 64 GB
+richtig an), dazu die Programme von MS-DOS 6.22, die es in Windows
+98/ME nicht mehr gibt (EXPAND, POWER, SHARE für Windows 3.x).
+
 Optionen
 --------
 

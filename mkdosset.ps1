@@ -93,8 +93,18 @@ function Read-TextFile([string]$path) {
 
 # --- the file list ---------------------------------------------------------------
 
-# source name of a list entry "A=B"
-function Get-SourceName([string]$entry) { return ($entry -split '=', 2)[0].ToUpperInvariant() }
+# a list entry: [medium:]path[>file in the CAB][=name in the set]
+#   NAME.EXT                  a file of your disks, found by name in -Source
+#   WinMe:WIN9X\EXTRACT.EXE   a file of a CD (Media), path from the CD root
+#   WinMe:WIN9X\WIN_16.CAB>ATTRIB.EXE   a file in a CAB of a CD
+function Get-Spec([string]$entry, [string]$medium) {
+    $src, $as = $entry -split '=', 2
+    if ($src -match '^(\w+):(.*)$') { $medium = $Matches[1]; $src = $Matches[2] }
+    $path, $member = $src -split '>', 2
+    if (-not $medium -and ($member -or $path -match '\\')) { throw "$entry needs a medium (Media in set.psd1)" }
+    $leaf = if ($member) { $member } else { ($path -split '\\')[-1] }
+    return [pscustomobject]@{ Medium = $medium; Path = $path; Member = $member; Leaf = $leaf.ToUpperInvariant(); As = $as }
+}
 
 # system files that the script makes: IO.SYS and COMMAND.COM from the CABs
 # of IoSysCabs (with ext/small-io-sys), MSDOS.SYS from MsdosSys
@@ -103,12 +113,12 @@ if ($def.IoSysCabs) { $madeSystem += 'IO.SYS', 'COMMAND.COM' }
 if ($def.MsdosSys) { $madeSystem += 'MSDOS.SYS' }
 
 $groups = @(
-    [pscustomobject]@{ Name = 'System files'; From = $def.SystemFrom; Files = @($def.System | Where-Object { $madeSystem -notcontains $_ }); Optional = $false }
+    [pscustomobject]@{ Name = 'System files'; From = $def.SystemFrom; Files = @($def.System | Where-Object { $madeSystem -notcontains $_ }); Optional = $false; Medium = $null }
 ) + @(if ($def.IoSysCabs) {
-    [pscustomobject]@{ Name = 'IO.SYS and COMMAND.COM'; From = $def.IoSysFrom; Files = $def.IoSysCabs; Optional = $false }
+    [pscustomobject]@{ Name = 'IO.SYS and COMMAND.COM'; From = $def.IoSysFrom; Files = $def.IoSysCabs; Optional = $false; Medium = $null }
 }) + @(
-    [pscustomobject]@{ Name = 'Setup programs'; From = $def.BootFrom; Files = $def.BootFiles; Optional = $false }
-) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional } })
+    [pscustomobject]@{ Name = 'Setup programs'; From = $def.BootFrom; Files = $def.BootFiles; Optional = $false; Medium = $null }
+) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional; Medium = $_.Medium } })
 
 # all files below $Source by name
 $index = @{}
@@ -136,15 +146,57 @@ function Find-SourceFile([string]$name) {
     return $hits[0]
 }
 
+# root folder of a CD in -Source: the folder that holds its Find file
+# (e.g. WIN9X\WIN_19.CAB); copy the CD or the folders the set needs
+$mediaRoot = @{}
+function Get-MediumRoot([string]$medium) {
+    if ($mediaRoot.ContainsKey($medium)) { return $mediaRoot[$medium] }
+    $m = $def.Media[$medium]
+    if (-not $m) { throw "Unknown medium $medium (Media in set.psd1)" }
+    $parts = $m.Find -split '\\'
+    $root = $null
+    foreach ($f in @($index[$parts[-1].ToUpperInvariant()])) {
+        if (-not $f) { continue }
+        $d = $f.Directory
+        $ok = $true
+        for ($i = $parts.Count - 2; $i -ge 0; $i--) {
+            if ($d.Name -ne $parts[$i]) { $ok = $false; break }   # file systems of CDs and Windows ignore case
+            $d = $d.Parent
+        }
+        if ($ok) { $root = $d.FullName; break }
+    }
+    $mediaRoot[$medium] = $root
+    return $root
+}
+
+# the file of a list entry on a medium, case-insensitive, or $null
+function Find-MediumFile($s) {
+    $d = Get-MediumRoot $s.Medium
+    if (-not $d) { return $null }
+    foreach ($p in $s.Path -split '\\') {
+        $hit = Get-ChildItem -LiteralPath $d -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq $p } | Select-Object -First 1
+        if (-not $hit) { return $null }
+        $d = $hit.FullName
+    }
+    return Get-Item -LiteralPath $d
+}
+
+function Test-Spec($s) {
+    if ($s.Medium) { return [bool](Find-MediumFile $s) }
+    return [bool](Find-SourceFile $s.Path)
+}
+
 $missingRequired = @()
 $skipGroup = @{}
 foreach ($g in $groups) {
-    $missing = @($g.Files | ForEach-Object { Get-SourceName $_ } | Where-Object { $Source -and -not (Find-SourceFile $_) })
+    $specs = @($g.Files | ForEach-Object { Get-Spec $_ $g.Medium })
+    $missing = @($specs | Where-Object { $Source -and -not (Test-Spec $_) } | ForEach-Object {
+        if ($_.Medium) { "$($_.Medium):$($_.Path)" } else { $_.Path } } | Select-Object -Unique)
     if ($List) {
         Write-Host ("{0}{1}  - from: {2}" -f $g.Name, $(if ($g.Optional) { ' (optional)' } else { '' }), $g.From)
-        foreach ($f in $g.Files) {
-            $n = Get-SourceName $f
-            $mark = if (-not $Source) { '  ' } elseif ($missing -contains $n) { '- ' } else { '+ ' }
+        foreach ($s in $specs) {
+            $mark = if (-not $Source) { '  ' } elseif (-not (Test-Spec $s)) { '- ' } else { '+ ' }
+            $n = if ($s.Medium) { "$($s.Path)$(if ($s.Member) { " > $($s.Member)" })" } else { $s.Path }
             Write-Host "  $mark$n"
         }
     }
@@ -159,15 +211,37 @@ foreach ($g in $groups) {
 }
 if ($List) {
     if ($Source) { Write-Host "`n+ = found in $Source, - = missing" }
+    if ($def.Media) {
+        Write-Host "`nCDs: copy them (or the folders named above) into -Source, keeping the folders:"
+        foreach ($k in $def.Media.Keys) { Write-Host ("  {0}: {1} (found by {2})" -f $k, $def.Media[$k].Name, $def.Media[$k].Find) }
+    }
     return
 }
 if (-not $Source) { throw "-Source is needed (folder with the files of your disks); -List shows the files" }
 if ($missingRequired.Count) { throw ("Missing in {0}: {1}" -f $Source, ($missingRequired -join ', ')) }
 
-function Read-SourceFile([string]$name) {
-    $f = Find-SourceFile $name
-    return [pscustomobject]@{ Name = $name.ToUpperInvariant(); Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
+# files from CABs: cabextract (ext/small-io-sys/tools) on Linux, expand.exe
+# on Windows; the other CABs of a set are in the same folder
+$cabDir = Join-Path ([IO.Path]::GetTempPath()) ("mkdosset-" + [guid]::NewGuid().ToString('N'))
+function Expand-CabFile([IO.FileInfo]$cab, [string]$member) {
+    $d = Join-Path $cabDir ([guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $d | Out-Null
+    if ([Environment]::OSVersion.Platform -eq 'Win32NT') {
+        $log = & (Join-Path $env:SystemRoot 'System32\expand.exe') "-F:$member" $cab.FullName $d 2>&1
+    } else {
+        $log = & (Join-Path $PSScriptRoot 'ext/small-io-sys/tools/cabextract-1.11.upx') -q -d $d -F $member $cab.FullName 2>&1
+    }
+    $f = Get-ChildItem -LiteralPath $d -File -Recurse | Where-Object { $_.Name -eq $member } | Select-Object -First 1
+    if (-not $f) { throw "$member not found in $($cab.FullName):`n$($log -join "`n")" }
+    return $f
 }
+
+function Read-Spec($s) {
+    $f = if ($s.Medium) { Find-MediumFile $s } else { Find-SourceFile $s.Path }
+    if ($s.Member) { $f = Expand-CabFile $f $s.Member }
+    return [pscustomobject]@{ Name = $s.Leaf; Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
+}
+function Read-SourceFile([string]$entry) { return Read-Spec (Get-Spec $entry $null) }
 
 # expand SZDD/KWAJ files; name from the file or the set's tables
 function Expand-File($f) {
@@ -191,7 +265,8 @@ function Get-PatchBytes($p, [string]$key) {
 }
 
 # patch the files of the set's Patches table: at offset At, or where the
-# old bytes occur exactly once; a shorter new text is padded with NULs
+# old bytes occur exactly once (or Count times: all of them); a shorter new
+# text is padded with NULs
 function Set-Patch([string]$name, $f) {
     foreach ($p in @($def.Patches)) {
         if ($p.Files -notcontains $name) { continue }
@@ -206,12 +281,13 @@ function Set-Patch([string]$name, $f) {
             while ($j -lt $old.Length -and $i + $j -lt $f.Data.Length -and $f.Data[$i + $j] -eq $old[$j]) { $j++ }
             if ($j -eq $old.Length) { $hits += $i }
         }
-        if ($hits.Count -ne 1) {
+        $want = if ($p.ContainsKey('Count')) { $p.Count } else { 1 }
+        if ($hits.Count -ne $want) {
             if ($p.ContainsKey('At')) { Write-Warning ("{0}: {1} not at 0x{2:X}, not patched" -f $name, $what, $p.At) }
             else { Write-Warning ("{0}: {1} found {2} times, not patched" -f $name, $what, $hits.Count) }
             continue
         }
-        [Array]::Copy($new, 0, $f.Data, $hits[0], $new.Length)
+        foreach ($h in $hits) { [Array]::Copy($new, 0, $f.Data, $h, $new.Length) }
     }
     return $f
 }
@@ -220,7 +296,7 @@ function Set-Patch([string]$name, $f) {
 
 $entries = [ordered]@{}            # archive name -> entry
 $known = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
-foreach ($n in $def.System + $def.BootFiles) { [void]$known.Add($n) }
+foreach ($n in $def.System + $def.BootFiles) { $s = Get-Spec $n $null; [void]$known.Add($(if ($s.As) { $s.As } else { $s.Leaf })) }
 
 function Add-Entry([string]$name, $f) {
     $entries[$name.ToUpperInvariant()] = New-Object GeosOne.Gdi.GdaEntry($name, $f.Data, $f.Time)
@@ -230,8 +306,9 @@ foreach ($rule in $def.Archive) {
     if ($skipGroup[$rule.Name]) { continue }
     $count = 0
     foreach ($item in $rule.Files) {
-        $src, $as = $item -split '=', 2
-        $f = Read-SourceFile $src
+        $s = Get-Spec $item $rule.Medium
+        $as = $s.As
+        $f = Read-Spec $s
         if ($rule.Zip) {
             $ms = New-Object IO.MemoryStream(, $f.Data)
             $z = New-Object IO.Compression.ZipArchive($ms, [IO.Compression.ZipArchiveMode]::Read)
@@ -275,7 +352,11 @@ if ($def.IoSysCabs) {
     $build = Join-Path $sios 'de'
     if (Test-Path -LiteralPath $build) { Remove-Item -LiteralPath $build -Recurse -Force }
     New-Item -ItemType Directory -Path $build | Out-Null
-    foreach ($n in $def.IoSysCabs) { Copy-Item -LiteralPath (Find-SourceFile $n).FullName -Destination (Join-Path $build $n) }
+    foreach ($n in $def.IoSysCabs) {
+        $s = Get-Spec $n $null
+        $f = if ($s.Medium) { Find-MediumFile $s } else { Find-SourceFile $s.Path }
+        Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $build $s.Leaf)
+    }
     try { & (Join-Path $sios 'compile.ps1') de *>&1 | Out-Null }
     catch { throw "ext/small-io-sys/compile.ps1 de failed: $_" }
     foreach ($m in @(@('IO.SYS', 'IO.SYS.win98sekbpc'), @('COMMAND.COM', 'command.com'))) {
@@ -303,8 +384,9 @@ $now = Get-Date
 $disk1 = [GeosOne.Gdi.Fat12Image]::new([GeosOne.Gdi.BootSectors]::Win9xFat12, "$($def.Label) 1", $serial)
 $disk1Files = [ordered]@{}
 foreach ($n in $def.System) {
-    $f = Set-Patch $n $(if ($made.ContainsKey($n)) { $made[$n] } else { Read-SourceFile $n })
-    $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = $(if ($n -in 'IO.SYS', 'MSDOS.SYS') { 7 } else { 0x20 }) }
+    $f = if ($made.ContainsKey($n)) { $made[$n] } else { Read-SourceFile $n }
+    $f = Set-Patch $f.Name $f
+    $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = $(if ($f.Name -in 'IO.SYS', 'MSDOS.SYS') { 7 } else { 0x20 }) }
 }
 $kb = $def.Keyboard
 $disk1Files['CONFIG.SYS'] = @{ Data = (ConvertTo-DosText "FILES=30`nBUFFERS=20`nLASTDRIVE=Z"); Time = $now; Attr = 0x20 }
@@ -323,7 +405,8 @@ foreach ($m in [regex]::Matches((Read-TextFile (Join-Path $setDir 'INSTALL.INI')
 }
 $disk1Files['LIESMICH.TXT'] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir 'LIESMICH.TXT'))); Time = $now; Attr = 0x20 }
 foreach ($n in $def.BootFiles) {
-    $f = Set-Patch $n (Read-SourceFile $n)
+    $f = Read-SourceFile $n
+    $f = Set-Patch $f.Name $f
     $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = 0x20 }
 }
 foreach ($n in $disk1Files.Keys) { $disk1.AddFile($n, $disk1Files[$n].Data, $disk1Files[$n].Time, [byte]$disk1Files[$n].Attr) }
@@ -374,4 +457,5 @@ if ($Dirs) {
         [IO.File]::WriteAllBytes((Join-Path $d ("{0}.D{1:D2}" -f $def.Name, $i)), $parts[$i - 1])
     }
 }
+if (Test-Path -LiteralPath $cabDir) { Remove-Item -LiteralPath $cabDir -Recurse -Force }
 Write-Host "Done: $($images.Count) disks."

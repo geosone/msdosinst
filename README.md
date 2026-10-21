@@ -8,9 +8,9 @@
 4. SYS C:, MS-DOS to `C:\DOS` (the other disks are asked for), new `CONFIG.SYS` and `AUTOEXEC.BAT`.
 5. Further software from other disks, e.g. [AHCIASPI](https://github.com/geosone/ahciaspi): the setup reads their `INSTALL.INI` and installs them in the same run.
 
-The files are packed with deflate, so the MS-DOS 7.1 disks 1-4, the MS-DOS 6.22 Supplemental Disk and the Windows 95 "OLDMSDOS" utilities fit on 4 disks.
+The set replaces MS-DOS 6.22 and its Supplemental Disk with the newest MS-DOS programs of Windows ME and Windows 98 SE (the system is MS-DOS 7.1 of Windows 98 SE), plus the MS-DOS 6.22 and Windows 95 "OLDMSDOS" programs that are not in them. The files are packed with deflate and fit on 3 disks.
 
-**This project contains no Microsoft programs.** You need your own, licensed MS-DOS disks; the script takes the files from them. The setup shows, one after another, a notice (`LIZENZ.TXT`, or your own text with `-Eula`) and the Microsoft license terms of Windows 98 SE and Windows 95 (from `PRECOPY1.CAB` of the German CDs) and of MS-DOS 6.22 (the OEM license printed in the MS-DOS 6.22 User's Guide; the disks contain none).
+**This project contains no Microsoft programs.** You need your own, licensed CDs and disks; the script takes the files from them. The setup shows, one after another, a notice (`LIZENZ.TXT`, or your own text with `-Eula`) and the Microsoft license terms of Windows ME, Windows 98 SE and Windows 95 (from `PRECOPY1.CAB` of the German CDs) and of MS-DOS 6.22 (the OEM license printed in the MS-DOS 6.22 User's Guide; the disks contain none).
 
 ## Use
 
@@ -20,13 +20,13 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux): clone with the submod
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
     .\mkdosset.ps1 -Source D:\dosfiles -Extra D:\ahciaspi
 
-1. Copy the files of your disks into one folder (subfolders are fine). **[FILES.md](FILES.md) lists every file the set needs, with its size and the disk it comes from** (`-List` shows the same). A file name must not occur twice with different contents: `SYS.COM` must be the MS-DOS 7.1 one of the system disk "W98_de", not the older one of DISK1. `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
-2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
+1. Copy the German Windows ME CD (folders `WIN9X` and `TOOLS\OLDMSDOS`), the German Windows 98 SE CD (folder `WIN98`) and the files of your MS-DOS 6.22 disks, Supplemental Disk and the Windows 95 `OTHER\OLDMSDOS` folder into one folder (subfolders are fine; keep the folders of the CDs). **[FILES.md](FILES.md) lists every file the set needs, with its place on the CD (CAB) and its size** (`-List` shows the same). The script extracts the files from the CABs (cabextract on Linux - `ext\small-io-sys\tools`, `expand.exe` on Windows). `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
+2. Run the script: it writes `out\DISK1.IMG` ... `DISK3.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 
 | Parameter | |
 |---|---|
-| `-Source` | folder with the files of your disks |
+| `-Source` | folder with your CDs and the files of your disks |
 | `-Out` | output folder (default `.\out`) |
 | `-Set` | disk set in `sets\` (default `msdos71de`) |
 | `-List` | only list the files the set needs |
@@ -41,10 +41,10 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux): clone with the submod
 
 | File | |
 |---|---|
-| `set.psd1` | the files needed (and their disks), the archive layout, names of compressed files |
+| `set.psd1` | the files needed (CDs, CABs, disks), the archive layout, names of compressed files, the patches |
 | `INSTALL.INI` | the setup (options, `CONFIG.SYS`, `AUTOEXEC.BAT`, texts) |
 | `LIZENZ.TXT` | the license notice shown first |
-| `EULA98SE.TXT`, `EULA95.TXT`, `EULA622.TXT` | the Microsoft license terms shown after it (`LicenseN=` in `INSTALL.INI`) |
+| `EULAME.TXT`, `EULA98SE.TXT`, `EULA95.TXT`, `EULA622.TXT` | the Microsoft license terms shown after it (`LicenseN=` in `INSTALL.INI`) |
 | `LIESMICH.TXT` | readme |
 
 Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country, MS-DOS Shell (VGA), MS-DOS 5.0/6.22 utilities, Windows 95 MS-DOS utilities (MEMMAKER, MSBACKUP, ...), AccessDOS, keyboard utilities, DRVBOOT, MS-DOS 6.22 network files.
@@ -56,9 +56,12 @@ Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country
 - `tools\GdiDisk.ps1` / `GdiDisk.cs` (from the GDI project): FAT12 image writer with our own boot sector for the MS-DOS 7.x `IO.SYS`, SZDD/KWAJ expand (the `*.??_` files), GDA archives (deflate, split over disks).
 - `IO.SYS`: [small-io-sys](https://github.com/geosone/small-io-sys) (submodule `ext\small-io-sys`, German build `compile.ps1 de`) makes it from `winboot.sys` of the CD: the changes of the Microsoft update KB311561, MS-DOS 7.1 instead of Windows 98 in the messages, without logo and MSDCM, compressed with aPACK (72,815 bytes). On Windows it downloads nasm and [apack1p](https://github.com/pts/apack1p) (submodule `ext\apack1p`, the source) once.
 - `COMMAND.COM`: the one of the same CD, with MS-DOS 7.1 in the messages (`Patches` in `set.psd1`), like on the MS-DOS 7.1 system disk.
+- The programs of Windows ME check for MS-DOS 8.00; the script patches the check to 7.10 (likewise the 6.22 programs, which check for 6.22). Without a Windows ME counterpart are taken from Windows 98 SE: `SYS.COM`, `KEYB.COM`, `NLSFUNC.EXE`, `EXT.EXE`.
+- `FDISK.EXE` (Windows ME): sizes of 100,000 MB and more with 6 digits, as in the FDISK of KB263044 fixed by Petr ([MSFN](https://msfn.org/board/topic/85573-corrected-fdisk-and-format/)), ported to the Windows ME FDISK.
+- `FORMAT.COM` (Windows ME): the size in MB was stored in 16 bits ("16,859,84 MB" for 82,396 MB); now in 32 bits.
 - Disk 1: `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM`, `SYS.COM`, `FDISK`, `FORMAT`, `KEYB`, `INSTALL.EXE`, `INSTALL.INI`, texts and the first archive part; the other disks hold the archive parts `MSDOS71.D02` ...
 
-Tested in QEMU: empty 500 MB disk, FDISK, restart, FORMAT, installation from 4 disks, AHCIASPI from an extra disk, boot from C: with CD-ROM (ASPICD + MSCDEX).
+Tested in QEMU: empty 2 GB disk, FDISK, restart, FORMAT, installation from 3 disks, all programs from C: (`/?`), FDISK and FORMAT on 100 and 200 GB disks, AHCIASPI from an extra disk, boot from C: with CD-ROM (ASPICD + MSCDEX).
 
 ## License
 

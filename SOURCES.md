@@ -1,5 +1,7 @@
 # Where the files of the MS-DOS 7.1 disk set come from
 
+**The set no longer uses these disks.** It now takes every file from the original media itself: the MS-DOS programs of the Windows ME CD (patched: version check, FDISK/FORMAT for large disks), `SYS.COM`, `KEYB.COM`, `NLSFUNC.EXE`, `EXT.EXE`, `IO.SYS` and `COMMAND.COM` of the Windows 98 SE CD, and the rest of the MS-DOS 6.22 disks, Supplemental Disk and Windows 95 CD ([FILES.md](FILES.md), `Patches` in `sets/msdos71de/set.psd1`). The third-party files of the disks (CuteMouse, NOSHARE, PKZIP, NDD, logo, ...) are left out. The list below documents where the files of the MS-DOS 7.1 disks came from.
+
 The MS-DOS 7.1 disks 1-4 (DISK1.EXE ... DISK4.EXE) and the system disk "W98_de" were put together by someone else. This list compares every file with the original media (German CDs/disks): **original** = byte-identical to the file on the named medium, **changed** = the file of that medium with the changes given, **other** = not on these media (other products, shareware, the author's own files).
 
 Compared with: Windows 95C OSR 2.5 (German CD), Windows 98 SE (German CD), Windows 98 SE boot disk, Windows ME (German CD), Windows 95 (German OEM CD), MS-DOS 6.22 (German disks). Where a file is on several media, the oldest MS-DOS 7.10 one is named first.
