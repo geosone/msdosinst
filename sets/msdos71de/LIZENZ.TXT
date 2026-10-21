@@ -18,6 +18,6 @@ Der Diskettensatz wurde mit mkdosset.ps1 aus Ihren eigenen CDs und
 Disketten erstellt. Er enthält keine Dateien des GeosOne-Projekts
 außer dem Installationsprogramm.
 
-Das Installationsprogramm INSTALL.EXE (GeosOne DOS Installer) ist
+Das Installationsprogramm INSTALL.EXE (GeosOne Dual Installer) ist
 freie Software unter der GNU General Public License Version 3:
 https://github.com/geosone/gdi

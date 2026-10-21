@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Builds an MS-DOS installation disk set (1.44 MB floppy images) with the
-    GeosOne DOS Installer from your own CDs and MS-DOS disks.
+    GeosOne Dual Installer from your own CDs and MS-DOS disks.
 
 .DESCRIPTION
     You put your CDs and disks (their files, or images: *.iso, *.img, also
@@ -41,7 +41,7 @@
     (sets\<set>\LIZENZ.TXT).
 
 .PARAMETER Installer
-    INSTALL.EXE of the GeosOne DOS Installer (default: .\INSTALL.EXE, then
+    INSTALL.EXE of the GeosOne Dual Installer (default: .\INSTALL.EXE, then
     ..\gdi\build\INSTALL.EXE).
 
 .PARAMETER Extra

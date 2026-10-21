@@ -1,4 +1,4 @@
-MS-DOS 7.1 - Setup mit dem GeosOne DOS Installer
+MS-DOS 7.1 - Setup mit dem GeosOne Dual Installer
 ================================================
 
 Installation

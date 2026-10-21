@@ -1,6 +1,6 @@
-# msdosinst - MS-DOS 7.1 disk set with the GeosOne DOS Installer
+# msdosinst - MS-DOS 7.1 disk set with the GeosOne Dual Installer
 
-`mkdosset.ps1` builds a set of bootable 1.44 MB floppy images that install MS-DOS 7.1 with the [GeosOne DOS Installer](https://github.com/geosone/gdi):
+`mkdosset.ps1` builds a set of bootable 1.44 MB floppy images that install MS-DOS 7.1 with the [GeosOne Dual Installer](https://github.com/geosone/gdi):
 
 1. Disk 1 boots and starts the setup (license, options).
 2. No drive C: yet: FDISK starts, the computer restarts, the setup continues.
