@@ -1,0 +1,459 @@
+------------------------------------
+MICROSOFT WINDOWS 98 ZWEITE AUSGABE
+------------------------------------
+
+
+ENDBENUTZER-LIZENZVERTRAG FÜR MICROSOFT-DESKTOPBETRIEBSSYSTEME
+
+WICHTIG - BITTE SORGFÄLTIG LESEN: Dieser Endbenutzer-Lizenzvertrag
+("EULA") ist ein rechtsgültiger Vertrag zwischen Ihnen (entweder als
+natürlicher oder als juristischer Person) und dem Hersteller
+("Hersteller") des Computersystems oder der Computersystemkomponenten
+("HARDWARE"), das/die Sie zusammen mit dem/n oben genannten Microsoft-
+Softwareprodukt(en) ("SOFTWAREPRODUKT" oder "SOFTWARE") erworben haben.
+Wenn Ihnen das SOFTWAREPRODUKT nicht mit einem neuen Computersystem oder
+einer neuen Computersystemkomponente zur Verfügung gestellt wird, sind
+Sie nicht berechtigt, das SOFTWAREPRODUKT zu verwenden oder zu kopieren.
+Das SOFTWAREPRODUKT umfasst Computersoftware sowie möglicherweise
+dazugehörige Medien, gedruckte Materialien und Dokumentation im
+"Online"- oder elektronischen Format. Jede zusammen mit dem
+SOFTWAREPRODUKT gelieferte Software, zu der ein separater Endbenutzer-
+Lizenzvertrag gehört, wird Ihnen gemäß den Bestimmungen jenes
+Lizenzvertrags lizenziert. Indem Sie das SOFTWAREPRODUKT installieren,
+kopieren, downloaden, anderweitig verwenden oder darauf zugreifen,
+erklären Sie sich damit einverstanden, durch die Bestimmungen dieses
+EULAs gebunden zu sein. Falls Sie den Bestimmungen dieses EULAs nicht
+zustimmen, sind der Hersteller und Microsoft Licensing, Inc. ("MS")
+nicht bereit, Ihnen das SOFTWAREPRODUKT zu lizenzieren. In diesem Falle
+sind Sie nicht berechtigt, das SOFTWAREPRODUKT zu verwenden oder zu
+kopieren. Ferner sind Sie verpflichtet, sich unverzüglich mit dem
+Hersteller in Verbindung zu setzen, um von diesem zu erfahren, wie Sie
+das/die unbenutzte/n Produkt/e gegen Rückerstattung des Kaufpreises
+zurückgeben können.
+
+SOFTWAREPRODUKTLIZENZ
+Das SOFTWAREPRODUKT ist sowohl durch Urheberrechtsgesetze und
+internationale Urheberrechtsverträge als auch durch andere Gesetze und
+Vereinbarungen über geistiges Eigentum geschützt. Das SOFTWAREPRODUKT
+wird lizenziert, nicht verkauft. Der Begriff "COMPUTER" bezieht sich in
+diesem EULA auf die HARDWARE, falls die HARDWARE ein einzelnes
+Computersystem ist, oder auf das Computersystem, mit dem die HARDWARE
+arbeitet, falls die HARDWARE eine Computersystemkomponente ist.
+
+1. LIZENZEINRÄUMUNG. Durch dieses EULA werden Ihnen die folgenden Rechte
+   eingeräumt:
+
+Installation und Verwendung der Software. Sie sind berechtigt, eine
+einzige Kopie des SOFTWAREPRODUKTS auf dem COMPUTER zu installieren und
+zu verwenden.
+
+Speicherung/Netzwerkverwendung. Das SOFTWAREPRODUKT darf nicht
+gleichzeitig auf oder von verschiedenen Computern, einschließlich
+Arbeitsstationen, Terminals oder anderen digitalen elektronischen
+Geräten ("Geräte") installiert, angezeigt, ausgeführt, gemeinsam genutzt
+oder verwendet werden. Auch der gleichzeitige Zugriff auf das
+SOFTWAREPRODUKT durch Geräte ist unzulässig. Unbeschadet des
+Vorstehenden und sofern nicht unten anders dargestellt, dürfen beliebig
+viele Geräte auf die Datei- und Druckdienste und Peer-Webdienste des
+SOFTWAREPRODUKTS (falls eingeschlossen) zugreifen oder diese anderweitig
+verwenden.
+
+Wenn das SOFTWAREPRODUKT Windows 98 ist, dürfen Sie zusätzlich (i) das
+"Mehrere Displays"-Feature des SOFTWAREPRODUKTS verwenden, um Ihren
+Desktop wie in der Online-Hilfedatei beschrieben zu erweitern, ohne eine
+Lizenz für jede Anzeige erwerben zu müssen; und (ii) maximal fünf (5)
+COMPUTERN die Verbindung mit dem einzigen COMPUTER erlauben, auf dem das
+SOFTWAREPRODUKT ausgeführt wird, jedoch nur, um mithilfe des Features
+"Internet Connection Sharing" des SOFTWAREPRODUKTS auf das Internet
+zuzugreifen. Sie dürfen diesen verbundenen COMPUTERN nicht erlauben,
+irgendeine andere Komponente des SOFTWAREPRODUKTS zu verwenden noch die
+gemeinsame Nutzung von Anwendungen wie unten beschrieben einzuleiten. In
+dem Maximum von fünf (5) Verbindungen sind auch indirekte Verbindungen
+durch Software oder Hardware enthalten, die Verbindungen in einem Pool
+verwaltet oder zusammenfasst.
+
+Wenn das SOFTWAREPRODUKT Windows NT Workstation ist, dürfen Sie das
+SOFTWAREPRODUKT auf einem einzigen COMPUTER als interaktive
+Arbeitsstationssoftware, nicht jedoch als Serversoftware verwenden. Sie
+dürfen jedoch maximal zehn (10) Geräte mit dem COMPUTER verbinden, um
+auf Dienste des SOFTWAREPRODUKTS, wie z.B. Datei- und Druckdienste oder
+Peer-Webdienste, zuzugreifen oder diese zu verwenden. In dem Maximum von
+zehn Verbindungen sind auch indirekte Verbindungen durch Software oder
+Hardware enthalten, die Verbindungen in einem Pool verwaltet oder
+zusammenfasst.
+
+Sicherungskopie. Falls der Hersteller dem COMPUTER keine Sicherungskopie
+des SOFTWAREPRODUKTS beigefügt hat, sind Sie berechtigt, eine einzige
+Sicherungskopie des SOFTWAREPRODUKTS anzufertigen. Diese Sicherungskopie
+dürfen Sie ausschließlich zu Archivierungszwecken verwenden.
+Sicherungsdienstprogramm. Wenn das SOFTWAREPRODUKT ein Microsoft-
+Sicherungsdienstprogramm enthält, dürfen Sie das Dienstprogramm
+verwenden, um die einzige Sicherungskopie anzufertigen. Nach dem
+Erstellen der Sicherungskopie wird das Sicherungsdienstprogramm
+dauerhaft deaktiviert. Soweit es in diesem EULA nicht ausdrücklich
+erlaubt wurde, dürfen Sie auf keine andere Art Kopien des
+SOFTWAREPRODUKTS oder der gedruckten Materialien, die der SOFTWARE
+beiliegen, anfertigen.
+
+2. BESCHREIBUNG ANDERER RECHTE UND EINSCHRÄNKUNGEN.
+
+Windows NT Workstation. Wenn das SOFTWAREPRODUKT Windows NT Workstation
+ist, gelten die folgenden zusätzlichen Einschränkungen.
+Prozessorbeschränkung - Das SOFTWAREPRODUKT darf nicht von mehr als der
+maximalen Anzahl von Prozessoren des COMPUTERS, wie sie zu Beginn dieses
+EULAs angegeben ist, verwendet werden.
+
+Wahl der Prozessorversion. Es ist möglich, dass die CD oder die
+Diskette(n), auf denen das SOFTWAREPRODUKT gespeichert ist, verschiedene
+Kopien des SOFTWAREPRODUKTS enthalten, von denen jede mit einer anderen
+Mikroprozessorarchitektur kompatibel ist (beispielsweise der
+x86-Architektur oder verschiedenen RISC-Architekturen)
+("Prozessorversion(en)"). Sie dürfen nur eine Kopie einer
+Prozessorversion des SOFTWAREPRODUKTS auf dem COMPUTER installieren und
+verwenden.
+
+Wahl der Sprachversion. Möglicherweise stellt Ihnen der Hersteller
+verschiedene Sprachversionen für ein oder mehrere nach diesem EULA
+lizenzierte Microsoft-Softwareprodukte zur Verfügung. Wenn es für das
+SOFTWAREPRODUKT mehr als eine Sprachversion gibt, dürfen Sie nur eine
+einzige der Sprachversionen verwenden. Bei der Installation des
+SOFTWAREPRODUKTS haben Sie einmalig die Möglichkeit, eine Sprachversion
+auszuwählen. Nach der Auswahl wird die von Ihnen ausgewählte
+Sprachversion auf dem COMPUTER installiert; die nicht ausgewählten
+Sprachversionen werden automatisch und dauerhaft von der Festplatte des
+COMPUTERS gelöscht.
+
+Wahl des Betriebssystems. Möglicherweise stellt Ihnen der Hersteller
+eine Auswahl von Microsoft-Betriebssystemsoftware für den COMPUTER zur
+Verfügung. Wenn das SOFTWAREPRODUKT mehr als eine (1) Microsoft-
+Betriebssystemsoftware (d.h. Windows 98, Windows 95, Windows NT
+Workstation, Windows for Workgroups, Windows, MS-DOS, MS-DOS und Windows
+oder MS-DOS und Windows for Workgroups) ("Microsoft-BS") enthält, haben
+Sie nur die Verwendung eines der zur Verfügung gestellten Microsoft-BS
+lizenziert. Bei der Installation der SOFTWARE haben Sie einmalig die
+Möglichkeit, ein (1) Microsoft-BS auszuwählen. Nach der Auswahl wird das
+von Ihnen ausgewählte Microsoft-BS auf dem COMPUTER installiert; die
+anderen nicht ausgewählten Microsoft-BS werden automatisch und dauerhaft
+von der Festplatte des COMPUTERS gelöscht.
+
+Einschränkungen im Hinblick auf Zurückentwicklung (Reverse Engineering),
+Dekompilierung und Disassemblierung. Sie sind nicht berechtigt, das
+SOFTWAREPRODUKT zurückzuentwickeln, zu dekompilieren oder zu
+disassemblieren, es sei denn, dass und nur insoweit, wie das anwendbare
+Recht, ungeachtet dieser Einschränkung, dies ausdrücklich gestattet.
+
+Trennung von Komponenten. Das SOFTWAREPRODUKT wird als einheitliches
+Produkt lizenziert. Sie sind nicht berechtigt, seine Komponenten für die
+Verwendung auf mehr als einem Computer zu trennen.
+
+Einzelner COMPUTER. Das SOFTWAREPRODUKT ist in Verbindung mit der
+HARDWARE als einzelnes integriertes Produkt lizenziert. Das
+SOFTWAREPRODUKT darf nur in Verbindung mit der HARDWARE wie in diesem
+EULA ausgeführt verwendet werden.
+
+Einzelnes EULA. Das Paket für das SOFTWAREPRODUKT enthält eventuell
+mehrere Versionen dieses EULAs, wie z.B. mehrere Übersetzungen und/oder
+Medienversionen (z.B. im Benutzerhandbuch und in der Software). In
+diesem Fall verfügen Sie nur über eine Lizenz zur Verwendung einer (1)
+Kopie des SOFTWAREPRODUKTS.
+
+Vermietung. Sie sind nicht berechtigt, das SOFTWAREPRODUKT zu vermieten,
+zu verleasen oder zu verleihen.
+
+Übertragung des Softwareprodukts. Sie sind berechtigt, alle Ihre Rechte
+aus diesem EULA dauerhaft zu übertragen, vorausgesetzt, die Übertragung
+erfolgt als Teil eines permanenten Verkaufs oder einer permanenten
+Übertragung der HARDWARE, Sie behalten keine Kopien zurück, Sie
+übertragen das vollständige SOFTWAREPRODUKT (einschließlich aller
+Komponenten, der Medien und gedruckten Materialien, aller Updates oder
+Sicherungskopien, dieses EULAs und ggf. der Echtheitsbescheinigung
+(Certificate of Authenticity)), und der Empfänger stimmt den Bedingungen
+dieses EULAs zu. Sofern das SOFTWAREPRODUKT ein Update ist, muss jede
+Übertragung auch alle vorhergehenden Versionen des SOFTWAREPRODUKTS
+umfassen.
+
+Kündigung. Unbeschadet sonstiger Rechte sind der Hersteller und MS
+berechtigt, dieses EULA zu kündigen, sofern Sie gegen die Bestimmungen
+dieses EULAs verstoßen. In einem solchen Fall sind Sie verpflichtet,
+sämtliche Kopien des SOFTWAREPRODUKTS und alle seine Komponenten zu
+vernichten.
+
+Marken. Dieses EULA gewährt Ihnen keinerlei Rechte in Verbindung mit
+Marken oder Dienstleistungsmarken des Herstellers, von MS oder deren
+Lieferanten (einschließlich Microsoft Corporation).
+
+Gemeinsame Nutzung von Anwendungen. Das SOFTWAREPRODUKT kann Microsoft
+NetMeeting enthalten, ein Produkt, das die gemeinsame Nutzung von
+Anwendungen auf zwei oder mehr Computern ermöglicht, auch wenn eine
+Anwendung nur auf einem der Computer installiert ist. Sie dürfen diese
+Technologie mit allen Microsoft-Anwendungsprodukten für Konferenzen mit
+mehreren Parteien nutzen. Für nicht von Microsoft stammende Anwendungen
+müssen Sie den Lizenzvertrag der Anwendung zu Rate ziehen oder sich an
+den Lizenzgeber wenden, um zu ermitteln, ob er die gemeinsame Nutzung
+von Anwendungen erlaubt.
+
+3. UPDATES. Sofern das SOFTWAREPRODUKT ein Update eines anderen Produkts
+   ist, müssen Sie zur Verwendung des SOFTWAREPRODUKTS über die
+   entsprechende Lizenz für ein Produkt verfügen, das vom Hersteller,
+   von MS oder von Microsoft Corporation für das Update als geeignet
+   bezeichnet wird, um das SOFTWAREPRODUKT zu verwenden. Nur im Fall von
+   Updateprodukten bezeichnet "HARDWARE" das Computersystem oder die
+   Computersystemkomponente, mit dem/der Sie das für das Update als
+   geeignet bezeichnete Produkt erhalten haben. Ein als Update
+   bezeichnetes SOFTWAREPRODUKT ersetzt und/oder ergänzt das mit der
+   HARDWARE gelieferte als für das Update geeignet bezeichnete Produkt.
+   Sie dürfen das resultierende aktualisierte Produkt nur in
+   Übereinstimmung mit den Bestimmungen dieses EULAs und nur zusammen
+   mit der HARDWARE verwenden. Wenn das SOFTWAREPRODUKT ein Update einer
+   Komponente eines Software-Programmpakets darstellt, das Sie als
+   Gesamtprodukt lizenziert haben, ist es nur gestattet, das
+   SOFTWAREPRODUKT als Teil dieses einzelnen Produktpakets zu verwenden
+   und zu übertragen; es ist nicht gestattet, es zu trennen und auf mehr
+   als einem Computer zu verwenden.
+
+4. URHEBERRECHT. Alle Rechte und geistigen Eigentumsrechte an dem
+   SOFTWAREPRODUKT (einschließlich, aber nicht beschränkt auf Bilder,
+   Fotografien, Animationen, Video, Audio, Musik, Text und "Applets",
+   die in dem SOFTWAREPRODUKT enthalten sind), den gedruckten
+   Begleitmaterialien und jeder Kopie des SOFTWAREPRODUKTS liegen bei MS
+   oder deren Lieferanten (einschließlich Microsoft Corporation). Sie
+   sind nicht berechtigt, die dem SOFTWAREPRODUKT beiliegenden
+   gedruckten Materialien zu vervielfältigen. Alle Rechte und geistigen
+   Eigentumsrechte in und an Inhalten, auf die mit Hilfe des
+   SOFTWAREPRODUKTS zugegriffen werden kann, sind Eigentum des
+   jeweiligen Inhaltseigentümers und können durch anwendbare
+   Urheberrechtsgesetze und andere Gesetze und Vereinbarungen über
+   geistiges Eigentum geschützt sein. Dieses EULA räumt Ihnen kein Recht
+   ein, solche Inhalte zu verwenden. MS und deren Lieferanten
+   (einschließlich Microsoft Corporation) behalten sich alle nicht
+   ausdrücklich in diesem EULA gewährten Rechte vor.
+
+5. SOFTWAREPRODUKT AUF ZWEI SPEICHERMEDIEN. Möglicherweise erhalten Sie
+   das SOFTWAREPRODUKT auf mehr als einem Speichermedium. Unabhängig von
+   Art und Größe des von Ihnen erhaltenen Mediums dürfen Sie nur ein für
+   Ihren Computer geeignetes Medium verwenden. Sie sind nicht
+   berechtigt, das andere Medium auf einem anderen Computer zu
+   installieren oder zu verwenden. Sie sind nicht berechtigt, das andere
+   Medium an andere Benutzer/innen zu verleihen, zu vermieten, zu
+   verleasen, zu verpachten oder anderweitig zu übertragen, es sei denn,
+   dies geschieht als Teil einer dauerhaften Übertragung (wie oben
+   beschrieben) des SOFTWAREPRODUKTS.
+
+6. PRODUKTSUPPORT. Produktsupport für das SOFTWAREPRODUKT wird nicht von
+   MS, Microsoft Corporation oder deren Tochterfirmen oder
+   Niederlassungen gewährt. Um Produktsupport zu erhalten, wenden Sie
+   sich bitte an die in der Dokumentation der HARDWARE angegebene
+   Supportnummer des Herstellers. Sofern Sie irgendwelche Fragen zu
+   diesem EULA haben oder aus einem anderen Grund Kontakt mit dem
+   Hersteller aufnehmen möchten, wenden Sie sich bitte an die in der
+   Dokumentation zur HARDWARE angegebene Adresse.
+
+7. AUSFUHRBESCHRÄNKUNGEN. Hiermit versichern Sie, dass Sie das
+   SOFTWAREPRODUKT in kein Land exportieren oder reexportieren und
+   keiner Person oder juristischen Person durch Export oder Reexport
+   zukommen lassen werden, die/das den US-Ausfuhrbeschränkungen
+   unterliegt. Sie stimmen insbesondere zu, dass Sie das SOFTWAREPRODUKT
+   (i) nicht in eines der Länder, die den US-Ausfuhrbeschränkungen
+   unterliegen (im März 1999 einschließlich, aber nicht notwendigerweise
+   beschränkt auf Kuba, Iran, Irak, Libyen, Nordkorea, Sudan und Syrien)
+   oder einem wo auch immer sich aufhaltenden Bürger eines dieser
+   Länder, der beabsichtigt, das SOFTWAREPRODUKT in ein solches Land
+   zurück zu übertragen oder zu befördern, (ii) nicht an eine natürliche
+   oder juristische Person, von der Sie wissen oder vermuten, dass sie
+   das SOFTWAREPRODUKT oder einen Teil davon zum Entwurf, zur
+   Entwicklung oder zur Produktion nuklearer, chemischer oder
+   biologischer Waffen verwendet und (iii) nicht an eine natürliche oder
+   juristische Person, der von einer Bundesdienststelle der US-Regierung
+   die Beteiligung an US-Ausfuhrtransaktionen verboten wurde,
+   exportieren oder reexportieren werden. Sie sichern hiermit zu, dass
+   weder das BXA (wie weiter unten definiert) noch eine andere US-
+   Bundesbehörde Ihre Exportrechte ausgesetzt, widerrufen oder abgelehnt
+   hat.
+
+
+8. ANMERKUNG ZUR JAVA-UNTERSTÜTZUNG. DAS SOFTWAREPRODUKT ENTHÄLT
+   MÖGLICHERWEISE UNTERSTÜTZUNG FÜR PROGRAMME, DIE IN JAVA GESCHRIEBEN
+   WURDEN. DIE JAVA-TECHNOLOGIE IST NICHT FEHLERTOLERANT UND WURDE NICHT
+   FÜR VERWENDUNG ODER WEITERVERKAUF ALS ONLINE-STEUERSOFTWARE IN
+   GEFAHRENTRÄCHTIGER UMGEBUNG ENTWICKELT ODER HERGESTELLT, IN DER
+   STÖRUNGSFREIER BETRIEB ERFORDERLICH IST, WIE Z.B. IN
+   NUKLEARTECHNISCHEN EINRICHTUNGEN, FLUGZEUGNAVIGATIONS- ODER
+   KOMMUNIKATIONSSYSTEMEN, IN DER FLUGSICHERUNG, IN MASCHINEN ZUR
+   DIREKTEN LEBENSERHALTUNG ODER IN WAFFENSYSTEMEN, IN DENEN EIN AUSFALL
+   DER JAVA-TECHNOLOGIE DIREKT ZU TODESFÄLLEN, PERSONENSCHÄDEN ODER
+   SCHWERWIEGENDEN SCHÄDEN AN SACHEN ODER UMWELT FÜHREN WÜRDE. Sun
+   Microsystems, Inc. hat Microsoft vertraglich verpflichtet, diesen
+   Haftungsausschluss aufzunehmen.
+
+
+HINSICHTLICH DER BESCHRÄNKTEN GEWÄHRLEISTUNG UND DER BESONDEREN IN IHREM
+LAND GELTENDEN BESTIMMUNGEN BEACHTEN SIE BITTE DIE BROSCHÜRE ÜBER DIE
+BESCHRÄNKTE GEWÄHRLEISTUNG, DIE IN DIESEM PAKET ENTHALTEN IST ODER MIT
+DEN GEDRUCKTEN MATERIALIEN DES SOFTWAREPRODUKTS ZUR VERFÜGUNG GESTELLT
+WIRD.
+
+
+Falls Sie Ihr Produkt in Deutschland, Österreich, Liechtenstein oder der
+Schweiz erworben haben, gilt die nachfolgende beschränkte Garantie für
+Sie:
+
+
+1. BESCHRÄNKTE GARANTIE. Der Hersteller garantiert (a) für einen
+   Zeitraum von neunzig (90) Tagen nach Erhalt der SOFTWARE, dass diese
+   im wesentlichen gemäss der begleitenden Benutzerdokumentation
+   arbeitet, und (b) für einen Zeitraum von einem (1) Jahr nach Erhalt
+   der mit der SOFTWARE gelieferten HARDWARE, dass diese bei normaler
+   Benutzung und Wartung keine Material- oder Verarbeitungsfehler
+   aufweist.
+
+2. ANSPRÜCHE DES KUNDEN. Vorbehaltlich des jeweils anwendbaren Rechts
+   besteht die gesamte Haftung des Herstellers und dessen Zulieferer und
+   Ihr alleiniger Anspruch nach Wahl des Herstellers entweder (a) in der
+   Rückerstattung des bezahlten Preises oder (b) in der Reparatur oder
+   dem Ersatz der SOFTWARE oder der HARDWARE, die dieser Beschränkten
+   Garantie nicht genügt und zusammen mit einer Kopie Ihrer Quittung an
+   den Hersteller zurückgegeben wird. Sie erhalten die vom Hersteller
+   ausgewählte Entschädigung ohne weitere Kosten mit Ausnahme der
+   Kosten, für die Sie verantwortlich sind und die Ihnen entstehen (zum
+   Beispiel Versendungskosten der SOFTWARE oder HARDWARE an den
+   Hersteller). Diese Beschränkte Garantie gilt nicht, wenn der Ausfall
+   der SOFTWARE oder der HARDWARE auf einen Unfall, auf Missbrauch, auf
+   fehlerhafte Anwendung oder auf einen Virus zurückzuführen ist. Für
+   die Ersatz-SOFTWARE oder -HARDWARE wird entweder für den Rest der
+   ursprünglichen Garantiefrist oder für dreissig (30) Tage die oben
+   beschriebene Garantie gewährt, wobei der längere Zeitraum massgebend
+   ist. Außerhalb der Vereinigten Staaten gelten diese Ansprüche nicht
+   ohne den Nachweis des Erwerbs von einer autorisierten internationalen
+   Geschäftsstelle. Um Ihre Rechte auszuüben, sollten Sie mit dem
+   Hersteller, wie in der Ihrem Computer beiliegenden Dokumentation
+   angegeben, Kontakt aufnehmen. Die Beschränkungen dieses Absatzes
+   gelten nicht im Falle von Ansprüchen nach dem Produkthaftungsgesetz.
+
+3. ANDERE GEWÄHRLEISTUNGSRECHTE UNBERÜHRT. Die obige Garantie wird vom
+   Hersteller des Produkts (SOFTWARE und HARDWARE) gewährt. Etwaige
+   gesetzliche Gewährleistungs- oder Haftungsansprüche, welche Ihnen
+   nach dem Gesetz Ihres Landes gegen den Händler zustehen, von dem Sie
+   Ihr Exemplar des Produkts erhalten haben, werden hierdurch weder
+   ersetzt noch beschränkt. Soweit anwendbar, gelten solche gesetzlichen
+   Gewährleistungsrechte zusätzlich zu der hierin eingeräumten
+   Herstellergarantie.
+
+4. KEINE WEITEREN GEWÄHRLEISTUNGEN DES HERSTELLERS. Im größtmöglichen,
+   durch das anwendbare Recht gestatteten Umfang lehnen der Hersteller
+   und dessen Lieferanten alle sonstigen Gewährleistungen in Bezug auf
+   die SOFTWARE, die HARDWARE und die Leistung bzw. Nichtleistung von
+   Supportdiensten ab, unabhängig davon, ob sie ausdrücklich oder
+   konkludent gewährt worden sind, einschließlich, aber nicht beschränkt
+   auf konkludente Gewährleistungen im Hinblick auf Handelsüblichkeit,
+   Eignung für einen bestimmten Zweck, Eigentum oder Nichtverletzung von
+   Rechten Dritter. Diese beschränkte Garantie verleiht Ihnen bestimmte
+   Rechte. Je nach Staat oder Rechtsordnung können Sie möglicherweise
+   weitere Rechte haben.
+
+5. HAFTUNGSBESCHRÄNKUNG. Im grösstmöglichen, durch das anwendbare Recht
+   gestatteten Umfang lehnen der Hersteller und dessen Lieferanten jede
+   Haftung für irgendwelche besonderen, zufälligen, indirekten oder
+   Folgeschäden (einschliesslich, aber nicht beschränkt auf Schäden aus
+   entgangenem Gewinn, Geschäftsunterbrechung, Verlust von
+   Geschäftsinformationen oder irgendwelchen anderen Vermögensschäden)
+   ab, die durch die Verwendung der SOFTWARE oder HARDWARE oder durch
+   die Tatsache, dass sie nicht verwendet werden können, oder durch die
+   Leistung bzw. Nichtleistung von Supportdiensten entstehen; dies gilt
+   auch dann, wenn der Hersteller zuvor auf die Möglichkeit solcher
+   Schäden hingewiesen worden ist. In jedem Fall beschränkt sich die
+   Haftung des Herstellers und seiner Lieferanten nach diesem EULA auf
+   den tatsächlich von Ihnen für die Produkte gezahlten Betrag. Falls
+   Sie mit dem Hersteller einen Vertrag über Supportleistungen
+   abgeschlossen haben, bestimmt sich die gesamte Haftung des
+   Herstellers in Bezug auf Supportleistungen nach den Bestimmungen
+   dieses Vertrags. Da einige Staaten oder Rechtsordnungen
+   Haftungsbegrenzungen bzw. Haftungsausschlüsse nicht gestatten, gilt
+   die vorstehende Beschränkung für Sie möglicherweise nicht. Diese
+   Haftungsbeschränkung gilt nicht für Ansprüche nach dem
+   Produkthaftungsgesetz.
+
+6. ANWENDBARES RECHT
+
+Wenn Sie dieses Produkt in Deutschland erworben haben, unterliegt dieses
+EULA deutschem Recht.
+
+Wenn Sie dieses Produkt in Österreich erworben haben, unterliegt dieses
+EULA österreichischem Recht.
+
+Wenn Sie dieses Produkt in Liechtenstein erworben haben, unterliegt
+dieses EULA dem Recht des Fürstentums Liechtenstein.
+
+Wenn Sie dieses Produkt in der Schweiz erworben haben, unterliegt dieses
+EULA Schweizer Recht.
+
+Wenn Sie dieses Produkt außerhalb der oben aufgeführten Länder erworben
+haben, gilt möglicherweise das lokal anwendbare Recht.
+
+
+APPENDIX
+WARRANTY AND SPECIAL PROVISIONS
+FOR
+THE UNITED STATES OF AMERICA AND ANY OTHER COUNTRY
+
+LIMITED WARRANTY
+
+LIMITED WARRANTY.  Manufacturer warrants that (a) the SOFTWARE will
+perform substantially in accordance with the accompanying written
+materials for a period of ninety (90) days from the date of receipt, and
+(b) any Microsoft hardware accompanying the SOFTWARE will be free from
+defects in materials and workmanship under normal use and service for a
+period of one (1) year from the date of receipt.  Any implied warranties
+on the SOFTWARE and Microsoft hardware are limited to ninety (90) days
+and one (1) year, respectively.  Some states/jurisdictions do not allow
+limitations on duration of an implied warranty, so the above limitation
+may not apply to you.
+
+CUSTOMER REMEDIES.  Manufacturer's and its suppliers' entire liability
+and your exclusive remedy shall be, at Manufacturer's option, either (a)
+return of the price paid, or (b) repair or replacement of the SOFTWARE
+or hardware that does not meet this Limited Warranty and which is
+returned to Manufacturer with a copy of your receipt.  This Limited
+Warranty is void if failure of the SOFTWARE or hardware has resulted
+from accident, abuse, or misapplication.  Any replacement SOFTWARE or
+hardware will be warranted for the remainder of the original warranty
+period or thirty (30) days, whichever is longer.
+
+NO OTHER WARRANTIES.  To the maximum extent permitted by applicable law,
+Manufacturer and its suppliers disclaim all other warranties, either
+express or implied, including, but not limited to implied warranties of
+merchantability and fitness for a particular purpose, with regard to the
+SOFTWARE, the accompanying written materials, and any accompanying
+hardware.  This limited warranty gives you specific legal rights.  You
+may have others which vary from state/jurisdiction to
+state/jurisdiction.
+
+NO LIABILITY FOR CONSEQUENTIAL DAMAGES.  To the maximum extent permitted
+by applicable law, in no event shall Manufacturer or its suppliers be
+liable for any damages whatsoever (including without limitation,
+special, incidental, consequential, or indirect damages for personal
+injury, loss of business profits, business interruption, loss of
+business information, or any other pecuniary loss) arising out of the
+use of or inability to use this product, even if Manufacturer has been
+advised of the possibility of such damages.  In any case, Manufacturer's
+and its suppliers' entire liability under any provision of this
+agreement shall be limited to the amount actually paid by you for the
+SOFTWARE and/or Microsoft hardware.  Because some states/jurisdictions
+do not allow the exclusion or limitation of liability for consequential
+or incidental damages, the above limitation may not apply to you.
+
+
+SPECIAL PROVISIONS
+
+U.S. GOVERNMENT RESTRICTED RIGHTS.  The SOFTWARE PRODUCT and
+documentation are provided with RESTRICTED RIGHTS.  Use, duplication, or
+disclosure by the United States Government is subject to restrictions as
+set forth in subparagraph (c)(1)(ii) of the Rights in Technical Data and
+Computer Software clause at DFARS 252.227-7013 or subparagraphs (c)(1)
+and (2) of the Commercial Computer Software-Restricted Rights at 48 CFR
+52.227-19, as applicable. Manufacturer is Microsoft Corporation/One
+Microsoft Way/Redmond, WA 98052-6399.
+
+If you acquired the SOFTWARE in the United States of America, this
+Software License Agreement and Warranty are governed by the laws of the
+State of Washington, U.S.A.  If you acquired the SOFTWARE outside the
+United States of America, local law may apply.

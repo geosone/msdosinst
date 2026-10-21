@@ -9,7 +9,8 @@ dem sie stammen (z. B. Windows 98 Second Edition).
 Sie dürfen diesen Diskettensatz nur verwenden, wenn Sie eine gültige
 Lizenz für dieses Produkt besitzen. Mit "Annehmen" bestätigen Sie,
 dass Sie die Lizenzbedingungen von Microsoft für dieses Produkt
-anerkennen und einhalten.
+anerkennen und einhalten. Die Lizenzbedingungen von Windows 98 SE,
+Windows 95 und MS-DOS 6.22 folgen auf den nächsten Seiten.
 
 Der Diskettensatz wurde mit mkdosset.ps1 aus Ihren eigenen Disketten
 erstellt. Er enthält keine Dateien des GeosOne-Projekts außer dem

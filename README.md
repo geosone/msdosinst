@@ -10,7 +10,7 @@
 
 The files are packed with deflate, so the MS-DOS 7.1 disks 1-4, the MS-DOS 6.22 Supplemental Disk and the Windows 95 "OLDMSDOS" utilities fit on 4 disks.
 
-**This project contains no Microsoft files.** You need your own, licensed MS-DOS disks; the script takes the files from them. The license text the setup shows is a notice by default; give the Microsoft EULA of your product with `-Eula`.
+**This project contains no Microsoft programs.** You need your own, licensed MS-DOS disks; the script takes the files from them. The setup shows, one after another, a notice (`LIZENZ.TXT`, or your own text with `-Eula`) and the Microsoft license terms of Windows 98 SE and Windows 95 (from `PRECOPY1.CAB` of the German CDs) and of MS-DOS 6.22 (the OEM license printed in the MS-DOS 6.22 User's Guide; the disks contain none).
 
 ## Use
 
@@ -30,7 +30,7 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux, macOS):
 | `-Out` | output folder (default `.\out`) |
 | `-Set` | disk set in `sets\` (default `msdos71de`) |
 | `-List` | only list the files the set needs |
-| `-Eula` | license text to show (e.g. the Microsoft EULA) |
+| `-Eula` | text shown instead of the notice `LIZENZ.TXT` |
 | `-Installer` | `INSTALL.EXE` (default `.\INSTALL.EXE`, then `..\gdi\build\INSTALL.EXE`) |
 | `-Extra` | folders of further software, one extra disk each |
 | `-Dirs` | also write the disk contents to folders |
@@ -43,7 +43,8 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux, macOS):
 |---|---|
 | `set.psd1` | the files needed (and their disks), the archive layout, names of compressed files |
 | `INSTALL.INI` | the setup (options, `CONFIG.SYS`, `AUTOEXEC.BAT`, texts) |
-| `LIZENZ.TXT` | the license notice shown by default |
+| `LIZENZ.TXT` | the license notice shown first |
+| `EULA98SE.TXT`, `EULA95.TXT`, `EULA622.TXT` | the Microsoft license terms shown after it (`LicenseN=` in `INSTALL.INI`) |
 | `LIESMICH.TXT` | readme |
 
 Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country, MS-DOS Shell (VGA), MS-DOS 5.0/6.22 utilities, Windows 95 MS-DOS utilities (MEMMAKER, MSBACKUP, ...), AccessDOS, keyboard utilities, DRVBOOT, MS-DOS 6.22 network files.

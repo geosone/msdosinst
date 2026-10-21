@@ -247,6 +247,12 @@ $disk1Files['AUTOEXEC.BAT'] = @{ Data = (ConvertTo-DosText $auto); Time = $now; 
 $disk1Files['INSTALL.EXE'] = @{ Data = [IO.File]::ReadAllBytes($Installer); Time = (Get-Item $Installer).LastWriteTime; Attr = 0x20 }
 $disk1Files['INSTALL.INI'] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir 'INSTALL.INI'))); Time = $now; Attr = 0x20 }
 $disk1Files['LIZENZ.TXT'] = @{ Data = (ConvertTo-DosText (Read-TextFile $licenseFile)); Time = $now; Attr = 0x20 }
+# further license texts of the set (LicenseN=Name|file in INSTALL.INI)
+foreach ($m in [regex]::Matches((Read-TextFile (Join-Path $setDir 'INSTALL.INI')), '(?m)^License\d=(?:[^|\r\n]*\|)?([^\s;]+)')) {
+    $n = $m.Groups[1].Value.ToUpperInvariant()
+    if ($disk1Files.Contains($n)) { continue }
+    $disk1Files[$n] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir $m.Groups[1].Value))); Time = $now; Attr = 0x20 }
+}
 $disk1Files['LIESMICH.TXT'] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir 'LIESMICH.TXT'))); Time = $now; Attr = 0x20 }
 foreach ($n in $def.BootFiles) {
     $f = Read-SourceFile $n
