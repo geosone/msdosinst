@@ -9,9 +9,9 @@
     Label  = 'MSDOS71'            # volume labels "MSDOS71 1", ...
     Keyboard = 'GR'               # KEYB on the setup disk
 
-    # disk 1: the patched MS-DOS 7.1 system files (IO.SYS 76036 bytes,
-    # COMMAND.COM 96370 bytes, from the system disk "W98_de"), the boot
-    # sector is written by mkdosset.ps1
+    # disk 1: the patched MS-DOS 7.1 system files (IO.SYS 76036 bytes from
+    # the system disk "W98_de"; COMMAND.COM of the Windows 98 SE CD, see
+    # Patches), the boot sector is written by mkdosset.ps1
     System     = @('IO.SYS', 'MSDOS.SYS', 'COMMAND.COM', 'SYS.COM')
     SystemFrom = 'MS-DOS 7.1 system disk "W98_de" (Win98_System_deutsch.IMG)'
     BootFiles  = @('FDISK.EXE', 'FORMAT.COM', 'KEYB.COM', 'KEYBOARD.SYS', 'KEYBRD2.SYS')
@@ -72,5 +72,24 @@
            Old = 'B4 30 E8 CF FD 3D 06 16 75 02'; New = 'B4 30 E8 CF FD 3D 07 0A 75 02' }
         @{ Files = @('AM.EXE')
            Old = '80 7E E6 06 75 06 80 7E E7 14'; New = '80 7E E6 07 75 06 80 7E E7 0A' }
+
+        # COMMAND.COM of the German Windows 98 SE CD (96370 bytes): MS-DOS 7.1
+        # instead of Windows 98, as on the MS-DOS 7.1 system disk
+        @{ Files = @('COMMAND.COM'); At = 0x5CA; OldText = 'Windows kann nicht geladen werden.'; NewText = 'MS-DOS kann nicht geladen werden. ' }
+        @{ Files = @('COMMAND.COM'); At = 0x913; OldText = 'Windows 98 [Version %1]'; NewText = 'MS-DOS 7.1' }
+        @{ Files = @('COMMAND.COM'); At = 0x22B5; OldText = 'Windows'; NewText = 'MS-DOS ' }
+        @{ Files = @('COMMAND.COM'); At = 0x233E; OldText = 'Windows-Eingabeaufforderung.'; NewText = 'MS-DOS-Eingabeaufforderung. ' }
+        @{ Files = @('COMMAND.COM'); At = 0x2497; OldText = 'Windows-Version'; NewText = 'MS-DOS-Version ' }
+        @{ Files = @('COMMAND.COM'); At = 0x2781; OldText = 'Windows-Umgebungsvariablen oder zeigt sie an.'; NewText = 'MS-DOS-Umgebungsvariablen oder zeigt sie an. ' }
+        @{ Files = @('COMMAND.COM'); At = 0x29E3; OldText = 'Windows-Version an.'; NewText = 'MS-DOS-Version an. ' }
+        @{ Files = @('COMMAND.COM'); At = 0x39C7; OldText = 'Windows 98 [Version %1]'; NewText = 'MS-DOS Version 7.1' }
+        @{ Files = @('COMMAND.COM'); At = 0x3AE2; OldText = 'Windows 98'; NewText = 'MS-DOS 7.1' }
+        @{ Files = @('COMMAND.COM'); At = 0x3BA8; OldText = 'Windows-Befehlsinterpreters.'; NewText = 'MS-DOS-Befehlsinterpreters. ' }
+        @{ Files = @('COMMAND.COM'); At = 0x8326; OldText = 'WINDOWS\COMMAND'; NewText = 'DOS\COMMAND' }
+        @{ Files = @('COMMAND.COM'); At = 0x84E9; OldText = ' (C)Copyright 1981-1995 Microsoft Corp'; NewText = '.1 Copyright 1981-1995 Microsoft Corp.' }
+        @{ Files = @('COMMAND.COM'); At = 0x15CED; OldText = ' (C)Copyright 1981-1995 Microsoft Corp'; NewText = '.1 Copyright 1981-1995 Microsoft Corp.' }
+        @{ Files = @('COMMAND.COM'); At = 0x167CF; OldText = '4.10.2222'; NewText = '' }
+        # runs on every DOS version (CMP AX,0A07h / JE -> JMP)
+        @{ Files = @('COMMAND.COM'); At = 0x6E79; Old = '3D 07 0A 74'; New = '90 90 90 EB' }
     )
 }

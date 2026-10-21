@@ -20,7 +20,7 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux, macOS):
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
     .\mkdosset.ps1 -Source D:\dosfiles -Extra D:\ahciaspi
 
-1. Copy the files of your disks into one folder (subfolders are fine). **[FILES.md](FILES.md) lists every file the set needs, with its size and the disk it comes from** (`-List` shows the same). A file name must not occur twice with different contents: the system files `IO.SYS`, `MSDOS.SYS`, `COMMAND.COM` and `SYS.COM` must be the MS-DOS 7.1 ones (IO.SYS 76036 bytes, from the system disk "W98_de"), not the older ones of DISK1.
+1. Copy the files of your disks into one folder (subfolders are fine). **[FILES.md](FILES.md) lists every file the set needs, with its size and the disk it comes from** (`-List` shows the same). A file name must not occur twice with different contents: the system files `IO.SYS`, `MSDOS.SYS` and `SYS.COM` must be the MS-DOS 7.1 ones (IO.SYS 76036 bytes, from the system disk "W98_de"), not the older ones of DISK1; `COMMAND.COM` is the one of the Windows 98 SE CD (96370 bytes, in `WIN98\PRECOPY2.CAB`), which the script patches like on the system disk.
 2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 

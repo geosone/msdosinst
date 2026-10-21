@@ -175,19 +175,33 @@ function Expand-File($f) {
     return [pscustomobject]@{ Name = $name.ToUpperInvariant(); Data = $data; Time = $f.Time }
 }
 
-# patch the byte strings of the set's Patches table (version checks)
+# bytes of a patch: Old/New in hex or OldText/NewText in code page 850
+function Get-PatchBytes($p, [string]$key) {
+    if ($p.ContainsKey("${key}Text")) { return [byte[]]$cp850.GetBytes($p["${key}Text"]) }
+    return [byte[]]($p[$key] -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })
+}
+
+# patch the files of the set's Patches table: at offset At, or where the
+# old bytes occur exactly once; a shorter new text is padded with NULs
 function Set-Patch([string]$name, $f) {
     foreach ($p in @($def.Patches)) {
         if ($p.Files -notcontains $name) { continue }
-        $old = [byte[]]($p.Old -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })
-        $new = [byte[]]($p.New -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })
+        $old = Get-PatchBytes $p 'Old'
+        $new = Get-PatchBytes $p 'New'
+        if ($new.Length -lt $old.Length) { $new = [byte[]]($new + (New-Object byte[] ($old.Length - $new.Length))) }
+        $what = if ($p.ContainsKey('OldText')) { "'$($p.OldText)'" } else { $p.Old }
         $hits = @()
-        for ($i = 0; $i -le $f.Data.Length - $old.Length; $i++) {
+        $from, $to = if ($p.ContainsKey('At')) { $p.At, $p.At } else { 0, ($f.Data.Length - $old.Length) }
+        for ($i = $from; $i -le $to; $i++) {
             $j = 0
-            while ($j -lt $old.Length -and $f.Data[$i + $j] -eq $old[$j]) { $j++ }
+            while ($j -lt $old.Length -and $i + $j -lt $f.Data.Length -and $f.Data[$i + $j] -eq $old[$j]) { $j++ }
             if ($j -eq $old.Length) { $hits += $i }
         }
-        if ($hits.Count -ne 1) { Write-Warning ("{0}: {1} found {2} times, not patched" -f $name, $p.Old, $hits.Count); continue }
+        if ($hits.Count -ne 1) {
+            if ($p.ContainsKey('At')) { Write-Warning ("{0}: {1} not at 0x{2:X}, not patched" -f $name, $what, $p.At) }
+            else { Write-Warning ("{0}: {1} found {2} times, not patched" -f $name, $what, $hits.Count) }
+            continue
+        }
         [Array]::Copy($new, 0, $f.Data, $hits[0], $new.Length)
     }
     return $f
@@ -254,7 +268,7 @@ $now = Get-Date
 $disk1 = [GeosOne.Gdi.Fat12Image]::new([GeosOne.Gdi.BootSectors]::Win9xFat12, "$($def.Label) 1", $serial)
 $disk1Files = [ordered]@{}
 foreach ($n in $def.System) {
-    $f = Read-SourceFile $n
+    $f = Set-Patch $n (Read-SourceFile $n)
     $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = $(if ($n -in 'IO.SYS', 'MSDOS.SYS') { 7 } else { 0x20 }) }
 }
 $kb = $def.Keyboard
@@ -274,7 +288,7 @@ foreach ($m in [regex]::Matches((Read-TextFile (Join-Path $setDir 'INSTALL.INI')
 }
 $disk1Files['LIESMICH.TXT'] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir 'LIESMICH.TXT'))); Time = $now; Attr = 0x20 }
 foreach ($n in $def.BootFiles) {
-    $f = Read-SourceFile $n
+    $f = Set-Patch $n (Read-SourceFile $n)
     $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = 0x20 }
 }
 foreach ($n in $disk1Files.Keys) { $disk1.AddFile($n, $disk1Files[$n].Data, $disk1Files[$n].Time, [byte]$disk1Files[$n].Attr) }

@@ -28,7 +28,8 @@ $o.Add('Copy these files from **your own** disks into one folder (subfolders are
 $o.Add('')
 $o.Add('- File names as on the disks: compressed files (' + $bt + '*.??_' + $bt + ') are taken as they are, the script expands them.')
 $o.Add('- A file name must occur only once: take ' + $bt + 'IO.SYS' + $bt + ', ' + $bt + 'MSDOS.SYS' + $bt + ', ' +
-    $bt + 'COMMAND.COM' + $bt + ' and ' + $bt + 'SYS.COM' + $bt + ' from the MS-DOS 7.1 system disk, **not** the older ones of disk 1.')
+    $bt + 'SYS.COM' + $bt + ' from the MS-DOS 7.1 system disk, **not** the older ones of disk 1, and ' + $bt + 'COMMAND.COM' + $bt +
+    ' of the Windows 98 SE CD (in ' + $bt + 'WIN98\PRECOPY2.CAB' + $bt + '; the script patches it).')
 $o.Add('- Optional groups may be missing; the setup then leaves out that part.')
 $o.Add('- ' + $bt + 'DISK1.EXE' + $bt + ' ... ' + $bt + 'DISK4.EXE' + $bt + ' are self-extracting ZIP archives; the script unpacks them.')
 $o.Add('- The sizes are those of the German MS-DOS 7.1 set the project was tested with; other versions may work but are untested.')
