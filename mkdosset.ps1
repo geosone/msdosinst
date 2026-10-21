@@ -175,6 +175,24 @@ function Expand-File($f) {
     return [pscustomobject]@{ Name = $name.ToUpperInvariant(); Data = $data; Time = $f.Time }
 }
 
+# patch the byte strings of the set's Patches table (version checks)
+function Set-Patch([string]$name, $f) {
+    foreach ($p in @($def.Patches)) {
+        if ($p.Files -notcontains $name) { continue }
+        $old = [byte[]]($p.Old -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })
+        $new = [byte[]]($p.New -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })
+        $hits = @()
+        for ($i = 0; $i -le $f.Data.Length - $old.Length; $i++) {
+            $j = 0
+            while ($j -lt $old.Length -and $f.Data[$i + $j] -eq $old[$j]) { $j++ }
+            if ($j -eq $old.Length) { $hits += $i }
+        }
+        if ($hits.Count -ne 1) { Write-Warning ("{0}: {1} found {2} times, not patched" -f $name, $p.Old, $hits.Count); continue }
+        [Array]::Copy($new, 0, $f.Data, $hits[0], $new.Length)
+    }
+    return $f
+}
+
 # --- archive contents -----------------------------------------------------------
 
 $entries = [ordered]@{}            # archive name -> entry
@@ -209,6 +227,7 @@ foreach ($rule in $def.Archive) {
         $x = Expand-File $f
         $target = if ($as) { $as.ToUpperInvariant() } else { $x.Name }
         if ($rule.KeepFirst -and $known.Contains($target)) { continue }
+        $x = Set-Patch $target $x
         Add-Entry "$($rule.To)\$target" $x
         if ($rule.To -eq 'DOS') { [void]$known.Add($target) }
         $count++

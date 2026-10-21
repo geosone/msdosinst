@@ -59,4 +59,18 @@
                      'BA_' = 'BAS'; 'GR_' = 'GRB'; 'IN_' = 'INI'; 'VI_' = 'VID'; 'HL_' = 'HLP'; '1X_' = '1XE'
                      '2X_' = '2XE'; 'DO_' = 'DOS' }
     ExpandNames = @{ 'DRVBOOT.BA_' = 'DRVBOOT.BAT' }
+
+    # version checks of the MS-DOS 6.22 programs (Supplemental Disk and the
+    # OLDMSDOS utilities of Windows 95): they accept only MS-DOS 6.22
+    # (CMP AX,1606h) resp. 6.20-6.x (AM.EXE, INT 21h AX=3306h) and are
+    # patched to accept MS-DOS 7.10; each byte string must occur exactly once
+    Patches = @(
+        @{ Files = @('APPEND.EXE', 'ASSIGN.COM', 'BACKUP.EXE', 'EDLIN.EXE', 'EXE2BIN.EXE', 'GRAFTABL.COM',
+                     'GRAPHICS.COM', 'JOIN.EXE', 'REPLACE.EXE', 'RESTORE.EXE', 'TREE.COM')
+           Old = 'B4 30 CD 21 3D 06 16 75 03'; New = 'B4 30 CD 21 3D 07 0A 75 03' }
+        @{ Files = @('APPEND.EXE')
+           Old = 'B4 30 E8 CF FD 3D 06 16 75 02'; New = 'B4 30 E8 CF FD 3D 07 0A 75 02' }
+        @{ Files = @('AM.EXE')
+           Old = '80 7E E6 06 75 06 80 7E E7 14'; New = '80 7E E6 07 75 06 80 7E E7 0A' }
+    )
 }
