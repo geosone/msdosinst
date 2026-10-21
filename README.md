@@ -14,7 +14,7 @@ The set replaces MS-DOS 6.22 and its Supplemental Disk with the newest MS-DOS pr
 
 ## Use
 
-PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux): clone with the submodules (`git clone --recursive`, or `git submodule update --init`).
+PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux). The **release zip** (GitHub Releases) has everything else: the submodules, `INSTALL.EXE`, 7-Zip for Windows and Linux (`tools\7zip`), nasm and apack1p for Windows (`ext\small-io-sys\tools\win`) and the Linux tools of small-io-sys; unpack it and run the script. From git: clone with the submodules (`git clone --recursive`, or `git submodule update --init`); 7-Zip then comes from the PATH or Program Files, on Windows nasm and apack1p are downloaded on the first run.
 
     .\mkdosset.ps1 -List                       # the files the set needs
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing

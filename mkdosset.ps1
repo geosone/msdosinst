@@ -18,7 +18,8 @@
     Folder with your CDs and disks (subfolders are searched too): their
     files, or CD images (*.iso), floppy images (*.img, *.ima) and 7-Zip
     archives of them (*.7z).  Images are unpacked with 7-Zip (7z on the
-    PATH, or Program Files\7-Zip) into the folder -Cache.
+    PATH, Program Files\7-Zip or tools\7zip of the release zip) into the
+    folder -Cache.
 
 .PARAMETER Cache
     Folder for the unpacked images (default: mkdosset-cache in the temp
@@ -149,7 +150,12 @@ function Get-SevenZip([string]$for) {
     foreach ($p in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
         if ($p -and (Test-Path -LiteralPath (Join-Path $p '7-Zip\7z.exe'))) { return (Join-Path $p '7-Zip\7z.exe') }
     }
-    throw "7-Zip is needed for $for (7z on the PATH or Program Files\7-Zip\7z.exe)"
+    # the one of the release zip
+    foreach ($c in '7z.exe', '7zz') {
+        $p = Join-Path $PSScriptRoot "tools/7zip/$c"
+        if ((Test-Path -LiteralPath $p) -and (($c -eq '7z.exe') -eq ([IO.Path]::DirectorySeparatorChar -eq '\'))) { return $p }
+    }
+    throw "7-Zip is needed for $for (7z on the PATH, Program Files\7-Zip\7z.exe or tools\7zip)"
 }
 
 function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
