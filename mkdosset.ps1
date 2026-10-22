@@ -45,19 +45,27 @@
     ..\gdi\build\INSTALL.EXE).
 
 .PARAMETER Extra
-    Folders of further software with INSTALL.INI (e.g. AHCIASPI): each
-    becomes an extra disk image EXTRA1.IMG, EXTRA2.IMG, ...
+    Further software with INSTALL.INI (e.g. AHCIASPI): folders or disk
+    images (*.IMG, e.g. AHCIASPI.IMG of make package).  Each becomes an
+    extra disk image EXTRA1.IMG, EXTRA2.IMG, ... and an entry of [Extras]
+    (offered with the options, installed in this order).
+
+.PARAMETER Disk1Free
+    Kilobytes left free on disk 1 (default 256) for files of your own, such
+    as the DOS driver of a disk or CD controller the computer needs.
 
 .PARAMETER Dirs
     Also write the files of each disk to a folder (DISK1\, ...).
 
 .PARAMETER Iso
     Also create a bootable INSTALL.ISO in -Out. Requires xorriso,
-    genisoimage or mkisofs on PATH and a DOS CD-ROM driver (-CdDriver).
+    genisoimage or mkisofs on PATH.  The CD boots with AHCIASPI.SYS and
+    ASPICD.SYS of the -Extra disks (AHCIASPI, EZ-SCSI), else -CdDriver.
 
 .PARAMETER CdDriver
-    DOS CD-ROM driver accepting /D:MSCD001 (e.g. OAKCDROM.SYS).
-    With -Iso, defaults to OAKCDROM.SYS found in -Source.
+    DOS CD-ROM driver accepting /D:MSCD001 (e.g. OAKCDROM.SYS), for -Iso
+    when -Extra has no AHCIASPI.SYS and ASPICD.SYS.  Default: OAKCDROM.SYS
+    found in -Source.
 
 .EXAMPLE
     .\mkdosset.ps1 -List
@@ -77,11 +85,14 @@ param(
     [string[]]$Extra = @(),
     [switch]$Dirs,
     [switch]$Iso,
-    [string]$CdDriver
+    [string]$CdDriver,
+    [int]$Disk1Free = 256
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'tools/GdiDisk.ps1')
+# -Extra a,b,c also as one argument (pwsh -File)
+$Extra = @($Extra | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 Add-Type -AssemblyName System.IO.Compression
 
 $setDir = Join-Path $PSScriptRoot "sets/$Set"
@@ -98,6 +109,22 @@ function ConvertTo-DosText([string]$text) {
     $t = ($text -replace "`r`n", "`n" -replace "`n", "`r`n")
     if (-not $t.EndsWith("`r`n")) { $t += "`r`n" }
     return $cp850.GetBytes($t)
+}
+
+# the files of an -Extra package: a folder, or a disk image (*.IMG) such as
+# build\AHCIASPI.IMG of AHCIASPI; name -> @{ Data; Time }
+function Read-ExtraFiles([string]$x) {
+    $files = [ordered]@{}
+    if (Test-Path -LiteralPath $x -PathType Leaf) {
+        $r = [GeosOne.Gdi.Fat12Reader]::new([IO.File]::ReadAllBytes($x))
+        foreach ($n in $r.Files.Keys) { $files[$n.ToUpperInvariant()] = @{ Data = $r.Files[$n]; Time = $r.Times[$n] } }
+    } elseif (Test-Path -LiteralPath $x -PathType Container) {
+        foreach ($f in Get-ChildItem -LiteralPath $x -File) {
+            $files[$f.Name.ToUpperInvariant()] = @{ Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
+        }
+    } else { throw "-Extra: $x not found" }
+    if (-not $files.Contains('INSTALL.INI')) { throw "$x has no INSTALL.INI" }
+    return $files
 }
 
 function Read-TextFile([string]$path) {
@@ -311,12 +338,16 @@ if ($List) {
 if (-not $Source) { throw "-Source is needed (folder with your CDs and disks); -List shows the files" }
 if ($missingRequired.Count) { throw ("Missing in {0}: {1}" -f $Source, ($missingRequired -join ', ')) }
 if ($Iso) {
-    if (-not $CdDriver) {
+    # the boot disk of the CD: AHCIASPI.SYS and ASPICD.SYS of the -Extra
+    # packages, else -CdDriver (or OAKCDROM.SYS in -Source)
+    $hasAspi = @{}
+    foreach ($x in $Extra) { foreach ($k in (Read-ExtraFiles $x).Keys) { if ($k -in 'AHCIASPI.SYS', 'ASPICD.SYS') { $hasAspi[$k] = 1 } } }
+    if (-not $CdDriver -and $hasAspi.Count -lt 2) {
         $driver = Find-SourceFile 'OAKCDROM.SYS'
         if ($driver) { $CdDriver = $driver.FullName }
     }
-    if (-not $CdDriver -or -not (Test-Path -LiteralPath $CdDriver -PathType Leaf)) {
-        throw '-Iso needs a DOS CD-ROM driver: use -CdDriver <path to OAKCDROM.SYS>, or put OAKCDROM.SYS in -Source.'
+    if ($hasAspi.Count -lt 2 -and (-not $CdDriver -or -not (Test-Path -LiteralPath $CdDriver -PathType Leaf))) {
+        throw '-Iso needs the CD-ROM drivers: -Extra with the AHCIASPI and EZ-SCSI disks (AHCIASPI.SYS, ASPICD.SYS), or -CdDriver <path to OAKCDROM.SYS>.'
     }
     if (-not (Get-Command xorriso, genisoimage, mkisofs -CommandType Application -ErrorAction SilentlyContinue)) {
         throw '-Iso needs xorriso, genisoimage or mkisofs on PATH.'
@@ -498,7 +529,19 @@ if ($kb) { $auto += "KEYB $kb,,A:\KEYBOARD.SYS >NUL`n" }
 $auto += "A:\INSTALL.EXE`n"
 $disk1Files['AUTOEXEC.BAT'] = @{ Data = (ConvertTo-DosText $auto); Time = $now; Attr = 0x20 }
 $disk1Files['INSTALL.EXE'] = @{ Data = [IO.File]::ReadAllBytes($Installer); Time = (Get-Item $Installer).LastWriteTime; Attr = 0x20 }
-$disk1Files['INSTALL.INI'] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir 'INSTALL.INI'))); Time = $now; Attr = 0x20 }
+# the -Extra packages are offered with the options ([Extras]: Id and name
+# of their INSTALL.INI); each is installed from its EXTRAn disk afterwards
+$setIni = Read-TextFile (Join-Path $setDir 'INSTALL.INI')
+if ($Extra.Count) {
+    $lines = foreach ($x in $Extra) {
+        $t = $cp850.GetString((Read-ExtraFiles $x)['INSTALL.INI'].Data)
+        $product = if ($t -match '(?m)^Product=([^\r\n;]*)') { $Matches[1].Trim() } else { [IO.Path]::GetFileNameWithoutExtension($x) }
+        $id = if ($t -match '(?m)^Id=([^\r\n;]*)') { $Matches[1].Trim() } else { $product }
+        "Extra=on|$id|$product"
+    }
+    $setIni = $setIni.TrimEnd() + "`n`n[Extras]`n" + ($lines -join "`n") + "`n"
+}
+$disk1Files['INSTALL.INI'] = @{ Data = (ConvertTo-DosText $setIni); Time = $now; Attr = 0x20 }
 $disk1Files['LIZENZ.TXT'] = @{ Data = (ConvertTo-DosText (Read-TextFile $licenseFile)); Time = $now; Attr = 0x20 }
 # further license texts of the set (LicenseN=Name|file in INSTALL.INI)
 foreach ($m in [regex]::Matches((Read-TextFile (Join-Path $setDir 'INSTALL.INI')), '(?m)^License\d=(?:[^|\r\n]*\|)?([^\s;]+)')) {
@@ -516,7 +559,9 @@ foreach ($n in $disk1Files.Keys) { $disk1.AddFile($n, $disk1Files[$n].Data, $dis
 
 # --- archive over the disks ------------------------------------------------------
 
-$cap1 = $disk1.FreeBytes - 512
+# room left on disk 1 for drivers of your own (a controller the setup needs)
+$cap1 = $disk1.FreeBytes - [Math]::Max(512, $Disk1Free * 1024)
+if ($cap1 -lt 4096) { throw "-Disk1Free $Disk1Free leaves no room for the archive on disk 1" }
 $parts = [GeosOne.Gdi.Gda]::Build($archive, [Func[int, long]] { param($n) if ($n -eq 1) { $cap1 } else { [GeosOne.Gdi.Fat12Image]::Size - 33 * 512 } }, $serial)
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
@@ -538,13 +583,15 @@ for ($i = 1; $i -le $images.Count; $i++) {
 $n = 0
 foreach ($x in $Extra) {
     $n++
-    if (-not (Test-Path -LiteralPath (Join-Path $x 'INSTALL.INI'))) { throw "$x has no INSTALL.INI" }
-    $img = [GeosOne.Gdi.Fat12Image]::new($null, "EXTRA $n", ($serial + 100 + $n))
-    foreach ($f in Get-ChildItem -LiteralPath $x -File) {
-        $img.AddFile($f.Name, [IO.File]::ReadAllBytes($f.FullName), $f.LastWriteTime, 0x20)
-    }
     $p = Join-Path $Out "EXTRA$n.IMG"
-    $img.Save($p)
+    $xf = Read-ExtraFiles $x
+    if (Test-Path -LiteralPath $x -PathType Leaf) {
+        Copy-Item -LiteralPath $x -Destination $p -Force   # the disk as it is
+    } else {
+        $img = [GeosOne.Gdi.Fat12Image]::new($null, "EXTRA $n", ($serial + 100 + $n))
+        foreach ($k in $xf.Keys) { $img.AddFile($k, $xf[$k].Data, $xf[$k].Time, 0x20) }
+        $img.Save($p)
+    }
     Write-Host ("{0}  ({1})" -f $p, $x)
 }
 
@@ -566,7 +613,9 @@ if ($Iso) {
     $mscdexPath = Join-Path $cabDir 'MSCDEX.EXE'
     New-Item -ItemType Directory -Path $cabDir -Force | Out-Null
     [IO.File]::WriteAllBytes($mscdexPath, $mscdex.Data)
-    & (Join-Path $PSScriptRoot 'tools/mkdosiso.ps1') -Disks $Out -CdDriver $CdDriver -Mscdex $mscdexPath -Extra $Extra
+    $isoArgs = @{ Disks = $Out; Mscdex = $mscdexPath; Extra = $Extra }
+    if ($CdDriver) { $isoArgs.CdDriver = $CdDriver }
+    & (Join-Path $PSScriptRoot 'tools/mkdosiso.ps1') @isoArgs
 }
 if (Test-Path -LiteralPath $cabDir) { Remove-Item -LiteralPath $cabDir -Recurse -Force }
 Write-Host "Done: $($images.Count) disks."

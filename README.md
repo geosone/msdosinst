@@ -8,7 +8,7 @@
 4. SYS C:, MS-DOS to `C:\DOS` (the other disks are asked for), new `CONFIG.SYS` and `AUTOEXEC.BAT`.
 5. Further software from other disks, e.g. [AHCIASPI](https://github.com/geosone/ahciaspi): the setup reads their `INSTALL.INI` and installs them in the same run.
 
-The set replaces MS-DOS 6.22 and its Supplemental Disk with the newest MS-DOS programs of Windows ME and Windows 98 SE (the system is MS-DOS 7.1 of Windows 98 SE), plus the MS-DOS 6.22 and Windows 95 "OLDMSDOS" programs that are not in them (DEFRAG is left out: the 6.22 one knows neither long file names nor FAT32, those of Windows 95/98/ME run only under Windows) and the Windows 3.x programs of MS-DOS 6.22. The files are packed with deflate and fit on 4 disks.
+The set replaces MS-DOS 6.22 and its Supplemental Disk with the newest MS-DOS programs of Windows ME and Windows 98 SE (the system is MS-DOS 7.1 of Windows 98 SE), plus the MS-DOS 6.22 and Windows 95 "OLDMSDOS" programs that are not in them (DEFRAG is left out: the 6.22 one knows neither long file names nor FAT32, those of Windows 95/98/ME run only under Windows) and the Windows 3.x programs of MS-DOS 6.22. The files are packed with deflate and fit on 4 disks. Of the CD-ROM and SCSI drivers only `MSCDEX.EXE` is in the set: the drivers come as extra disks (`-Extra`), [AHCIASPI](https://github.com/geosone/ahciaspi) for SATA/IDE and [EUSBASPI](https://github.com/geosone/eusbaspi) for USB drives, with `ASPICD.SYS`/`ASPIDISK.SYS` of your own Adaptec EZ-SCSI CD ([ezscsi](https://github.com/geosone/ezscsi)) until [OpenASPI](https://github.com/geosone/OpenASPI) has its own.
 
 **This project contains no Microsoft programs.** You need your own, licensed CDs and disks; the script takes the files from them. The setup shows, one after another, a notice (`LIZENZ.TXT`, or your own text with `-Eula`) and the Microsoft license terms of Windows ME, Windows 98 SE and Windows 95 (from `PRECOPY1.CAB` of the German CDs) and of MS-DOS 6.22 (the OEM license printed in the MS-DOS 6.22 User's Guide; the disks contain none).
 
@@ -18,11 +18,11 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux). The **release zip** (
 
     .\mkdosset.ps1 -List                       # the files the set needs
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
-    .\mkdosset.ps1 -Source D:\dosfiles -Extra D:\ahciaspi
-    .\mkdosset.ps1 -Source D:\dosfiles -Iso -CdDriver D:\drivers\OAKCDROM.SYS
+    .\mkdosset.ps1 -Source D:\dosfiles -Extra EZSCSI.IMG, AHCIASPI.IMG, EUSBASPI.IMG
+    .\mkdosset.ps1 -Source D:\dosfiles -Iso -Extra EZSCSI.IMG, AHCIASPI.IMG, EUSBASPI.IMG
 
 1. Put your German Windows ME, Windows 98 SE and Windows 95 CDs and your MS-DOS 6.22 disks (with the Supplemental Disk) into one folder (subfolders are fine): as images (`*.iso`, `*.img`, or 7-Zip archives `*.7z` of them, e.g. `Windows ME.CD1.iso` and `Disk01.img` ... `Disk04 - Supplemental.img` - the script unpacks them with [7-Zip](https://www.7-zip.org/) into `-Cache` and keeps them there for the next run), or as files: the folders `WIN9X` and `TOOLS\OLDMSDOS` of the ME CD, `WIN98` of the 98 SE CD, `OTHER\OLDMSDOS` of the 95 CD (keep the folders) and the files of the disks (disk 1 in its own folder: the Supplemental Disk has another `EXPAND.EXE`). **[FILES.md](FILES.md) lists every file the set needs, with its place on the CD (CAB) and its size** (`-List` shows the same). The script extracts the files from the CABs (cabextract on Linux - `ext\small-io-sys\tools`, `expand.exe` on Windows). `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
-2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` folder (with an `INSTALL.INI`) an `EXTRAn.IMG`.
+2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` package (a folder or disk image with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 
 | Parameter | |
@@ -34,38 +34,41 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux). The **release zip** (
 | `-List` | only list the files the set needs |
 | `-Eula` | text shown instead of the notice `LIZENZ.TXT` |
 | `-Installer` | `INSTALL.EXE` (default `.\INSTALL.EXE`, then `..\gdi\build\INSTALL.EXE`) |
-| `-Extra` | folders of further software, one extra disk each |
+| `-Disk1Free` | kilobytes left free on disk 1 for files of your own, e.g. the driver of a controller (default 256) |
+| `-Extra` | further software, one extra disk each: folders or disk images (`AHCIASPI.IMG`, `EUSBASPI.IMG` of `make package`, `EZSCSI.IMG` of [ezscsi](https://github.com/geosone/ezscsi)); Setup offers them with the options (`[Extras]`) and asks for each disk chosen, in this order |
 | `-Dirs` | also write the disk contents to folders |
 | `-Iso` | also create a bootable `out\INSTALL.ISO` with all installation files |
-| `-CdDriver` | DOS CD-ROM driver for the ISO, accepting `/D:MSCD001`; default: `OAKCDROM.SYS` found in `-Source` |
+| `-CdDriver` | DOS CD-ROM driver for the ISO, accepting `/D:MSCD001`, when `-Extra` has no AHCIASPI and EZ-SCSI disk; default: `OAKCDROM.SYS` found in `-Source` |
 
 ### Installation CD
 
 `-Iso` creates a BIOS-bootable El Torito CD in addition to the floppy images.
 It requires **xorriso**, **genisoimage** or **mkisofs** on PATH (Windows or
-Linux), and a DOS CD-ROM driver such as `OAKCDROM.SYS` from your own boot
-disk. The driver must support your CD controller and accept `/D:MSCD001`.
-The project does not include this driver. `MSCDEX.EXE` is taken from the
-DOS files already collected for the set.
+Linux). The boot disk of the CD finds the CD-ROM drive with `AHCIASPI.SYS`
+(SATA/AHCI and IDE) and `ASPICD.SYS`, taken from the AHCIASPI and EZ-SCSI
+disks given with `-Extra`. Without them, `-CdDriver` names a DOS CD-ROM
+driver such as `OAKCDROM.SYS` from your own boot disk (it must accept
+`/D:MSCD001`). `MSCDEX.EXE` is taken from the DOS files already collected
+for the set.
 
 The CD boots with a 1.44 MB floppy image on A:, loads the CD driver and
 MSCDEX, assigns the CD to R:, and starts `R:\SETUP\INSTALL.EXE`. All archive
 parts are in `R:\SETUP`, so installation needs no floppy changes. Boot from
 the CD again after FDISK restarts the computer. Remove the CD when setup
 finishes. This is a legacy BIOS CD; it requires BIOS/CSM boot and a CD
-controller supported by the supplied DOS driver (for example IDE/ATAPI
-with OAKCDROM).
+drive on a SATA (AHCI) or IDE controller (or one the `-CdDriver` supports).
 
-Each `-Extra` folder is also copied to `R:\EXTRA1`, `R:\EXTRA2`, etc. The
-extra software dialog starts at `R:\EXTRA1`; enter another directory to
-install another package.
+Each `-Extra` package is also copied to `R:\EXTRA1`, `R:\EXTRA2`, etc.; the
+packages chosen from the list are installed from there without a question.
+The extra software dialog afterwards starts at `R:\EXTRA1`; enter another
+directory to install another package.
 
 You can also create the ISO from an existing disk set without rebuilding it:
 
-    pwsh -File tools/mkdosiso.ps1 -Disks ./out -CdDriver ./OAKCDROM.SYS -Mscdex ./MSCDEX.EXE
+    pwsh -File tools/mkdosiso.ps1 -Disks ./out -Mscdex ./MSCDEX.EXE -Extra EZSCSI.IMG,AHCIASPI.IMG
 
 This writes `out/INSTALL.ISO`. Use `-Iso <path>` on **mkdosiso.ps1** to choose
-another filename and `-Extra <folders>` to include additional packages.
+another filename and `-Extra <folders or images>` to include additional packages.
 
 ## Disk sets
 

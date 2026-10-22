@@ -2,16 +2,21 @@
 .SYNOPSIS
     Builds a bootable installation CD from a mkdosset floppy set.
 .DESCRIPTION
-    Requires xorriso, genisoimage or mkisofs on PATH, a DOS CD-ROM driver
-    compatible with /D:MSCD001 (e.g. OAKCDROM.SYS), and MSCDEX.EXE.
+    Requires xorriso, genisoimage or mkisofs on PATH and MSCDEX.EXE.  The
+    boot disk of the CD finds the CD-ROM drive with AHCIASPI.SYS (SATA/IDE)
+    and ASPICD.SYS, taken from the -Extra packages (the AHCIASPI disk and
+    the EZ-SCSI disk of ezscsi); without them, -CdDriver names a DOS CD-ROM
+    driver compatible with /D:MSCD001 (e.g. OAKCDROM.SYS).
     No Microsoft files or CD-ROM drivers are included in this project.
+.EXAMPLE
+    ./tools/mkdosiso.ps1 -Disks ./out -Mscdex D:\dosfiles\MSCDEX.EXE -Extra EZSCSI.IMG,AHCIASPI.IMG
 .EXAMPLE
     ./tools/mkdosiso.ps1 -Disks ./out -CdDriver D:\dosfiles\OAKCDROM.SYS -Mscdex D:\dosfiles\MSCDEX.EXE
 #>
 [CmdletBinding()]
 param(
     [string]$Disks = (Join-Path (Get-Location) 'out'),
-    [Parameter(Mandatory = $true)][string]$CdDriver,
+    [string]$CdDriver,
     [Parameter(Mandatory = $true)][string]$Mscdex,
     [string]$Iso,
     [string[]]$Extra = @()
@@ -24,6 +29,22 @@ if ('System.Text.CodePagesEncodingProvider' -as [type]) {
     [Text.Encoding]::RegisterProvider([Text.CodePagesEncodingProvider]::Instance)
 }
 $encoding = [Text.Encoding]::GetEncoding(850)
+
+# the files of an -Extra package: a folder, or a disk image (*.IMG) such as
+# build\AHCIASPI.IMG of AHCIASPI; name -> @{ Data; Time }
+function Read-ExtraFiles([string]$x) {
+    $files = [ordered]@{}
+    if (Test-Path -LiteralPath $x -PathType Leaf) {
+        $r = [GeosOne.Gdi.Fat12Reader]::new([IO.File]::ReadAllBytes($x))
+        foreach ($n in $r.Files.Keys) { $files[$n.ToUpperInvariant()] = @{ Data = $r.Files[$n]; Time = $r.Times[$n] } }
+    } elseif (Test-Path -LiteralPath $x -PathType Container) {
+        foreach ($f in Get-ChildItem -LiteralPath $x -File) {
+            $files[$f.Name.ToUpperInvariant()] = @{ Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
+        }
+    } else { throw "-Extra: $x not found" }
+    if (-not $files.Contains('INSTALL.INI')) { throw "$x has no INSTALL.INI" }
+    return $files
+}
 function Get-DosBytes([string]$value) {
     return ,$encoding.GetBytes(($value -replace "`r?`n", "`r`n") + "`r`n")
 }
@@ -34,7 +55,21 @@ foreach ($name in 'xorriso', 'genisoimage', 'mkisofs') {
     if ($builder) { break }
 }
 if (-not $builder) { throw 'ISO creation needs xorriso, genisoimage or mkisofs on PATH.' }
-$driverFile = Get-Item -LiteralPath $CdDriver
+# the CD-ROM drive at boot: AHCIASPI.SYS and ASPICD.SYS of the -Extra
+# packages, else -CdDriver
+$Extra = @($Extra | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
+$aspi = @{}
+foreach ($x in $Extra) {
+    $xf = Read-ExtraFiles $x
+    foreach ($n in 'AHCIASPI.SYS', 'ASPICD.SYS') {
+        if ($xf.Contains($n) -and -not $aspi.ContainsKey($n)) { $aspi[$n] = $xf[$n] }
+    }
+}
+$useAspi = $aspi.Count -eq 2
+if (-not $useAspi) {
+    if (-not $CdDriver) { throw 'The CD needs AHCIASPI.SYS and ASPICD.SYS in -Extra (the AHCIASPI and EZ-SCSI disks), or -CdDriver.' }
+    $driverFile = Get-Item -LiteralPath $CdDriver
+}
 $mscdexFile = Get-Item -LiteralPath $Mscdex
 $firstPath = Join-Path $Disks 'DISK1.IMG'
 $first = [GeosOne.Gdi.Fat12Reader]::new([IO.File]::ReadAllBytes($firstPath))
@@ -74,14 +109,17 @@ try {
     $ini = $ini -replace '(?m)^RestartText=[^\r\n]*', 'RestartText=Der Computer muss jetzt neu starten. Lassen Sie die Installations-CD eingelegt und starten Sie erneut von CD.'
     $ini = $ini -replace '(?m)^DosDoneText=[^\r\n]*', 'DosDoneText=Nehmen Sie die Installations-CD heraus und starten Sie den Computer neu.'
     $ini = $ini.Replace('von anderen Disketten installieren.', 'aus den EXTRA-Verzeichnissen dieser CD installieren.')
+    # [Extras]: the n-th package is in R:\EXTRAn of the CD
+    $script:extraN = 0
+    $ini = [regex]::Replace($ini, '(?m)^(Extra=[^\r\n]*)', { param($m) $script:extraN++; "$($m.Groups[1].Value)|R:\EXTRA$script:extraN" })
     [IO.File]::WriteAllBytes((Join-Path $setup 'INSTALL.INI'), $encoding.GetBytes($ini))
     $n = 0
-    foreach ($folder in $Extra) {
-        if (-not (Test-Path -LiteralPath (Join-Path $folder 'INSTALL.INI') -PathType Leaf)) { throw "$folder has no INSTALL.INI" }
+    foreach ($x in $Extra) {
+        $xf = Read-ExtraFiles $x
         $n++
         $dest = Join-Path $stage "EXTRA$n"
         New-Item -ItemType Directory -Path $dest | Out-Null
-        Get-ChildItem -LiteralPath $folder -Force | Copy-Item -Destination $dest -Recurse -Force
+        foreach ($k in $xf.Keys) { [IO.File]::WriteAllBytes((Join-Path $dest $k), $xf[$k].Data) }
     }
     # El Torito floppy emulation keeps the boot medium on A:, leaving C:
     # available for the real hard disk. All archive parts live on the CD.
@@ -94,9 +132,15 @@ try {
         foreach ($name in 'KEYB.COM', 'KEYBOARD.SYS') { $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20) }
     }
     $now = Get-Date
-    $boot.AddFile('CDROM.SYS', [IO.File]::ReadAllBytes($driverFile.FullName), $driverFile.LastWriteTime, 0x20)
+    if ($useAspi) {
+        foreach ($n in 'AHCIASPI.SYS', 'ASPICD.SYS') { $boot.AddFile($n, $aspi[$n].Data, $aspi[$n].Time, 0x20) }
+        $drivers = "DEVICE=A:\AHCIASPI.SYS`nDEVICE=A:\ASPICD.SYS /D:MSCD001"
+    } else {
+        $boot.AddFile('CDROM.SYS', [IO.File]::ReadAllBytes($driverFile.FullName), $driverFile.LastWriteTime, 0x20)
+        $drivers = "DEVICE=A:\CDROM.SYS /D:MSCD001"
+    }
     $boot.AddFile('MSCDEX.EXE', [IO.File]::ReadAllBytes($mscdexFile.FullName), $mscdexFile.LastWriteTime, 0x20)
-    $config = "FILES=30`nBUFFERS=20`nLASTDRIVE=Z`nDEVICE=A:\CDROM.SYS /D:MSCD001"
+    $config = "FILES=30`nBUFFERS=20`nLASTDRIVE=Z`n$drivers"
     $boot.AddFile('CONFIG.SYS', (Get-DosBytes $config), $now, 0x20)
     # Preserve the keyboard choice from the disk set's AUTOEXEC.BAT.
     $keyboard = ''
