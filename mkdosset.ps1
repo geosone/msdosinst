@@ -51,6 +51,14 @@
 .PARAMETER Dirs
     Also write the files of each disk to a folder (DISK1\, ...).
 
+.PARAMETER Iso
+    Also create a bootable INSTALL.ISO in -Out. Requires xorriso,
+    genisoimage or mkisofs on PATH and a DOS CD-ROM driver (-CdDriver).
+
+.PARAMETER CdDriver
+    DOS CD-ROM driver accepting /D:MSCD001 (e.g. OAKCDROM.SYS).
+    With -Iso, defaults to OAKCDROM.SYS found in -Source.
+
 .EXAMPLE
     .\mkdosset.ps1 -List
     .\mkdosset.ps1 -Source D:\dos71files -Extra D:\ahciaspi
@@ -67,7 +75,9 @@ param(
     [string]$Eula,
     [string]$Installer,
     [string[]]$Extra = @(),
-    [switch]$Dirs
+    [switch]$Dirs,
+    [switch]$Iso,
+    [string]$CdDriver
 )
 
 $ErrorActionPreference = 'Stop'
@@ -300,6 +310,18 @@ if ($List) {
 }
 if (-not $Source) { throw "-Source is needed (folder with your CDs and disks); -List shows the files" }
 if ($missingRequired.Count) { throw ("Missing in {0}: {1}" -f $Source, ($missingRequired -join ', ')) }
+if ($Iso) {
+    if (-not $CdDriver) {
+        $driver = Find-SourceFile 'OAKCDROM.SYS'
+        if ($driver) { $CdDriver = $driver.FullName }
+    }
+    if (-not $CdDriver -or -not (Test-Path -LiteralPath $CdDriver -PathType Leaf)) {
+        throw '-Iso needs a DOS CD-ROM driver: use -CdDriver <path to OAKCDROM.SYS>, or put OAKCDROM.SYS in -Source.'
+    }
+    if (-not (Get-Command xorriso, genisoimage, mkisofs -CommandType Application -ErrorAction SilentlyContinue)) {
+        throw '-Iso needs xorriso, genisoimage or mkisofs on PATH.'
+    }
+}
 
 # files from CABs: cabextract (ext/small-io-sys/tools) on Linux, expand.exe
 # on Windows; the other CABs of a set are in the same folder
@@ -537,6 +559,14 @@ if ($Dirs) {
         New-Item -ItemType Directory -Force -Path $d | Out-Null
         [IO.File]::WriteAllBytes((Join-Path $d ("{0}.D{1:D2}" -f $def.Name, $i)), $parts[$i - 1])
     }
+}
+if ($Iso) {
+    $mscdex = $archive | Where-Object { $_.Name -eq 'DOS\MSCDEX.EXE' } | Select-Object -First 1
+    if (-not $mscdex) { throw 'The disk set archive has no DOS\MSCDEX.EXE for CD boot.' }
+    $mscdexPath = Join-Path $cabDir 'MSCDEX.EXE'
+    New-Item -ItemType Directory -Path $cabDir -Force | Out-Null
+    [IO.File]::WriteAllBytes($mscdexPath, $mscdex.Data)
+    & (Join-Path $PSScriptRoot 'tools/mkdosiso.ps1') -Disks $Out -CdDriver $CdDriver -Mscdex $mscdexPath -Extra $Extra
 }
 if (Test-Path -LiteralPath $cabDir) { Remove-Item -LiteralPath $cabDir -Recurse -Force }
 Write-Host "Done: $($images.Count) disks."
