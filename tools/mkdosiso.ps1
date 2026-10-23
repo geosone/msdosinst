@@ -112,6 +112,11 @@ try {
     $ini = $ini -replace '(?m)^RestartText=[^\r\n]*', 'RestartText=Der Computer muss jetzt neu starten. Lassen Sie die Installations-CD eingelegt und starten Sie erneut von CD.'
     $ini = $ini -replace '(?m)^DosDoneText=[^\r\n]*', 'DosDoneText=Nehmen Sie die Installations-CD heraus und starten Sie den Computer neu.'
     $ini = $ini.Replace('von anderen Disketten installieren.', 'aus den EXTRA-Verzeichnissen dieser CD installieren.')
+    # FDISK and FORMAT run from the boot disk (FORMAT started from the CD
+    # fails: "CDR101: Not ready" reading R:, unseen under the setup), SYS
+    # takes the system files from it (from R: "Ungueltige Funktion")
+    $ini = $ini -replace '(?m)^(Fdisk|Format)=([^\\:\s]+)', '$1=A:\$2'
+    $ini = $ini -replace '(?m)^(Before=\S*SYS\.COM) (%BOOT%)', '$1 A: $2'
     # [Extras]: the n-th package is in R:\EXTRAn of the CD
     $script:extraN = 0
     $ini = [regex]::Replace($ini, '(?m)^(Extra=[^\r\n]*)', { param($m) $script:extraN++; "$($m.Groups[1].Value)|R:\EXTRA$script:extraN" })
@@ -131,6 +136,10 @@ try {
         $attr = if ($name -eq 'COMMAND.COM') { 0x20 } else { 7 }
         $boot.AddFile($name, $first.Files[$name], $first.Times[$name], [byte]$attr)
     }
+    foreach ($m in [regex]::Matches($ini, '(?m)^(?:Fdisk|Format)=A:\\(\S+)')) {
+        $name = $m.Groups[1].Value.ToUpperInvariant()
+        if ($first.Files.ContainsKey($name)) { $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20) }
+    }
     if ($first.Files.ContainsKey('KEYB.COM') -and $first.Files.ContainsKey('KEYBOARD.SYS')) {
         foreach ($name in 'KEYB.COM', 'KEYBOARD.SYS') { $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20) }
     }
@@ -145,13 +154,22 @@ try {
     $boot.AddFile('MSCDEX.EXE', [IO.File]::ReadAllBytes($mscdexFile.FullName), $mscdexFile.LastWriteTime, 0x20)
     $config = "FILES=30`nBUFFERS=20`nLASTDRIVE=Z`n$drivers"
     $boot.AddFile('CONFIG.SYS', (Get-DosBytes $config), $now, 0x20)
-    # Preserve the keyboard choice from the disk set's AUTOEXEC.BAT.
-    $keyboard = ''
+    # Keep the lines of the disk set's AUTOEXEC.BAT before the setup (KEYB,
+    # the mouse driver); the programs started from A: come along with the
+    # files of the same name (MOUSE.EXE, MOUSE.LAN)
+    $before = ''
     if ($first.Files.ContainsKey('AUTOEXEC.BAT')) {
-        $match = [regex]::Match($encoding.GetString($first.Files['AUTOEXEC.BAT']), '(?im)^KEYB[^\r\n]*')
-        if ($match.Success) { $keyboard = $match.Value + "`n" }
+        foreach ($line in ($encoding.GetString($first.Files['AUTOEXEC.BAT']) -split "`r?`n")) {
+            if (-not $line -or $line -ieq '@ECHO OFF' -or $line -match '(?i)^A:\\INSTALL\.EXE') { continue }
+            if ($line -match '(?i)^A:\\(\w+)\.(?:EXE|COM)\b') {
+                foreach ($name in @($first.Files.Keys | Where-Object { $_ -like "$($Matches[1].ToUpperInvariant()).*" })) {
+                    $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20)
+                }
+            }
+            $before += $line + "`n"
+        }
     }
-    $auto = "@ECHO OFF`n${keyboard}A:\MSCDEX.EXE /D:MSCD001 /L:R`nIF NOT EXIST R:\SETUP\INSTALL.INI GOTO NOCD`nSET PATH=A:\;R:\SETUP`nR:`nCD \SETUP`nR:\SETUP\INSTALL.EXE`nGOTO END`n:NOCD`nECHO Installation CD not found. Check the CD-ROM driver.`n:END"
+    $auto = "@ECHO OFF`n${before}A:\MSCDEX.EXE /D:MSCD001 /L:R`nIF NOT EXIST R:\SETUP\INSTALL.INI GOTO NOCD`nSET PATH=A:\;R:\SETUP`nR:`nCD \SETUP`nR:\SETUP\INSTALL.EXE`nGOTO END`n:NOCD`nECHO Installation CD not found. Check the CD-ROM driver.`n:END"
     $boot.AddFile('AUTOEXEC.BAT', (Get-DosBytes $auto), $now, 0x20)
     $boot.Save((Join-Path $stage 'BOOT.IMG'))
     $isoPath = [IO.Path]::GetFullPath($Iso)

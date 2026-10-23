@@ -21,6 +21,9 @@
         Win95   = @{ Name = 'Windows 95 CD (German, 1995, not OSR 2.x)'; Find = 'OTHER\OLDMSDOS\MEMMAKER.EXE' }
         # the Supplemental Disk has another EXPAND.EXE (English)
         Dos622  = @{ Name = 'MS-DOS 6.22 disk 1 (German)'; Find = 'DOSSETUP.INI' }
+        # Microsoft Mouse 11.0 (English, there is no German one): MOUSE.EXE
+        # and its texts MOUSE.LAN
+        Mouse11 = @{ Name = 'Microsoft Mouse 11.0 disk'; Find = 'MOUEXE.INF' }
     }
 
     # disk 1: the MS-DOS 7.1 system files, the boot sector is written by
@@ -39,6 +42,14 @@
     BootFiles  = @('WinMe:WIN9X\BASE2.CAB>FDISK.EXE', 'WinMe:WIN9X\WIN_9.CAB>FORMAT.COM', 'Win98se:WIN98\WIN98_25.CAB>KEYB.COM',
                    'WinMe:WIN9X\WIN_19.CAB>KEYBOARD.SYS', 'WinMe:WIN9X\WIN_19.CAB>KEYBRD2.SYS')
     BootFrom   = 'Windows ME CD, Windows 98 SE CD'
+    # optional on disk 1: the Microsoft mouse driver (see Patches), started
+    # before the setup (BootRun, lines of AUTOEXEC.BAT) when its disk is in
+    # -Source.  MSINPUT names a folder that does not exist: the driver then
+    # writes no MSINPUT.INI (the setup disk may be write-protected, the boot
+    # disk of the CD always is: "Schreibschutzfehler")
+    BootDriver     = @('Mouse11:MOUSE.EXE', 'Mouse11:MOUSE.LAN')
+    BootDriverFrom = 'Microsoft Mouse 11.0 disk'
+    BootRun        = @('SET MSINPUT=A:\NOINI', 'A:\MOUSE.EXE')
 
     # archive: Files (as above; Medium = the CD of entries without one),
     # Zip = self-extracting ZIP archive, To = directory in the archive,
@@ -82,6 +93,9 @@
                      'MWAV.EX_', 'MWAV.HL_', 'MWAVABSI.DL_', 'MWAVDLG.DL_', 'MWAVDOSL.DL_', 'MWAVDRVL.DL_', 'MWAVMGR.DL_',
                      'MWAVSCAN.DL_', 'MWAVSOS.DL_', 'MWAVTSR.EX_', 'MWGRAFIC.DL_', 'MWUNDEL.EX_', 'MWUNDEL.HL_',
                      'SMARTMON.EX_', 'SMARTMON.HL_', 'WNTOOLS.GR_') }
+        # the mouse driver, loaded by AUTOEXEC.BAT (option of INSTALL.INI)
+        @{ Name = 'Microsoft Mouse 11.0'; From = 'Microsoft Mouse 11.0 disk'; Medium = 'Mouse11'; To = 'DOS'; Optional = $true
+           Files = @('MOUSE.EXE', 'MOUSE.LAN') }
         @{ Name = 'MS-DOS Shell'; From = 'MS-DOS 6.22 Supplemental Disk (Zusatzdiskette)'; To = 'SUPP\SHELL'; Optional = $true; KeepFirst = $true
            Files = @('DOSSHELL.CO_', 'DOSSHELL.EX_', 'DOSSHELL.HL_', 'DOSSWAP.EX_',
                      'VGA.GR_=DOSSHELL.GRB', 'EGA.IN_=DOSSHELL.INI', 'VGA.VI_=DOSSHELL.VID') }
@@ -143,6 +157,19 @@
                      'SORT.EXE', 'SUBST.EXE', 'XCOPY.EXE', 'XCOPY32.EXE', 'XCOPY32.MOD')
            Old = 'B4 30 CD 21 3D 08 00 74'; New = 'B4 30 CD 21 3D 07 0A 74' }
         @{ Files = @('DOSKEY.COM'); Old = 'CD 21 86 C4 3D 00 08 74'; New = 'CD 21 86 C4 3D 0A 07 74' }
+
+        # Microsoft Mouse 11.0 MOUSE.EXE: the PS/2 mouse is not found with
+        # BIOSes that take only 3-byte packets (SeaBIOS: QEMU, many newer
+        # BIOSes): INT 15h C205h (initialize) with packet size 3 instead of
+        # 1, and the callback (C207h) takes the whole packet (status, X, Y
+        # on the stack) at once instead of one byte per call: mov ax,[bp+0Ch]
+        # / mov [0F2h],ax / mov ax,[bp+0Ah] / mov [0F4h],ax / mov ax,[bp+8] /
+        # mov [0F6h],ax / mov byte [0F8h],2 / jmp to the packet code (the
+        # resync on timeouts and the re-init on hot plug are left out)
+        @{ Files = @('MOUSE.EXE'); At = 0x35E1; Old = 'B8 05 C2 B7 01'; New = 'B8 05 C2 B7 03' }
+        @{ Files = @('MOUSE.EXE'); At = 0x3288
+           Old = 'E8 B4 01 9C 80 3E F8 00 00 74 09 9D 9C 72 05 C6 06 F8 00 00 9D 33 DB 8A 1E F8 00 D0 E3 81 C3 F2 00 8B 46 0C 89 07 80 3E F8 00 00 74 12 80 7F FE AA 75 0C 3C 00 75 08 C6 06 F8 00 04 E9 6E 01'
+           New = '8B 46 0C A3 F2 00 8B 46 0A A3 F4 00 8B 46 08 A3 F6 00 C6 06 F8 00 02 E9 25 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
 
         # Windows ME FORMAT.COM: the size of the medium in MB is computed in 32
         # bits but stored in 16 ("Formatierung 16,859,84 MB" for 82,396 MB).

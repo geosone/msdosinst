@@ -167,7 +167,9 @@ $groups = @(
     [pscustomobject]@{ Name = 'IO.SYS and COMMAND.COM'; From = $def.IoSysFrom; Files = $def.IoSysCabs; Optional = $false; Medium = $null }
 }) + @(
     [pscustomobject]@{ Name = 'Setup programs'; From = $def.BootFrom; Files = $def.BootFiles; Optional = $false; Medium = $null }
-) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional; Medium = $_.Medium } })
+) + @(if ($def.BootDriver) {
+    [pscustomobject]@{ Name = 'Driver of the setup disk'; From = $def.BootDriverFrom; Files = $def.BootDriver; Optional = $true; Medium = $null }
+}) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional; Medium = $_.Medium } })
 
 # --- images in -Source ----------------------------------------------------------
 
@@ -530,6 +532,9 @@ $kb = $def.Keyboard
 $disk1Files['CONFIG.SYS'] = @{ Data = (ConvertTo-DosText "FILES=30`nBUFFERS=20`nLASTDRIVE=Z"); Time = $now; Attr = 0x20 }
 $auto = "@ECHO OFF`n"
 if ($kb) { $auto += "KEYB $kb,,A:\KEYBOARD.SYS >NUL`n" }
+# the optional driver (BootDriver, e.g. the mouse driver) when found
+$bootDriver = $def.BootDriver -and -not $skipGroup['Driver of the setup disk']
+if ($bootDriver) { foreach ($r in $def.BootRun) { $auto += "$r`n" } }
 $auto += "A:\INSTALL.EXE`n"
 $disk1Files['AUTOEXEC.BAT'] = @{ Data = (ConvertTo-DosText $auto); Time = $now; Attr = 0x20 }
 $disk1Files['INSTALL.EXE'] = @{ Data = [IO.File]::ReadAllBytes($Installer); Time = (Get-Item $Installer).LastWriteTime; Attr = 0x20 }
@@ -554,7 +559,7 @@ foreach ($m in [regex]::Matches((Read-TextFile (Join-Path $setDir 'INSTALL.INI')
     $disk1Files[$n] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir $m.Groups[1].Value))); Time = $now; Attr = 0x20 }
 }
 $disk1Files['LIESMICH.TXT'] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir 'LIESMICH.TXT'))); Time = $now; Attr = 0x20 }
-foreach ($n in $def.BootFiles) {
+foreach ($n in @($def.BootFiles) + @(if ($bootDriver) { $def.BootDriver })) {
     $f = Read-SourceFile $n
     $f = Set-Patch $f.Name $f
     $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = 0x20 }

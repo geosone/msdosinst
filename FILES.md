@@ -13,6 +13,7 @@ Put **your own** media into one folder (subfolders are fine): the CD images (`*.
 | Name | Found by |
 |---|---|
 | MS-DOS 6.22 disk 1 (German) | `DOSSETUP.INI` |
+| Microsoft Mouse 11.0 disk | `MOUEXE.INF` |
 | Windows 95 CD (German, 1995, not OSR 2.x) | `OTHER\OLDMSDOS\MEMMAKER.EXE` |
 | Windows 98 SE CD (German) | `WIN98\WIN98_25.CAB` |
 | Windows ME CD (German) | `WIN9X\WIN_19.CAB` |
@@ -154,6 +155,15 @@ From: MS-DOS 6.22 disks 2 and 3
 | `SMARTMON.EX_` | 13,747 |
 | `SMARTMON.HL_` | 7,319 |
 | `WNTOOLS.GR_` | 1,103 |
+
+## Microsoft Mouse 11.0 (optional)
+
+From: Microsoft Mouse 11.0 disk
+
+| File | On the CD | Size (bytes) |
+|---|---|---:|
+| `MOUSE.EXE` | `MOUSE.EXE` | 110,394 |
+| `MOUSE.LAN` | `MOUSE.LAN` | 3,915 |
 
 ## MS-DOS Shell (optional)
 
