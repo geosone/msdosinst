@@ -4,12 +4,13 @@
 .DESCRIPTION
     Requires xorriso, genisoimage or mkisofs on PATH and MSCDEX.EXE.  The
     boot disk of the CD finds the CD-ROM drive with AHCIASPI.SYS (SATA/IDE)
-    and ASPICD.SYS, taken from the -Extra packages (the AHCIASPI disk and
-    the EZ-SCSI disk of ezscsi); without them, -CdDriver names a DOS CD-ROM
-    driver compatible with /D:MSCD001 (e.g. OAKCDROM.SYS).
+    and ASPICDA.SYS of OpenASPI, both on the AHCIASPI disk (0.4 and later),
+    or else ASPICD.SYS of the EZ-SCSI disk of ezscsi, taken from the -Extra
+    packages; without them, -CdDriver names a DOS CD-ROM driver compatible
+    with /D:MSCD001 (e.g. OAKCDROM.SYS).
     No Microsoft files or CD-ROM drivers are included in this project.
 .EXAMPLE
-    ./tools/mkdosiso.ps1 -Disks ./out -Mscdex D:\dosfiles\MSCDEX.EXE -Extra EZSCSI.IMG,AHCIASPI.IMG
+    ./tools/mkdosiso.ps1 -Disks ./out -Mscdex D:\dosfiles\MSCDEX.EXE -Extra AHCIASPI.IMG
 .EXAMPLE
     ./tools/mkdosiso.ps1 -Disks ./out -CdDriver D:\dosfiles\OAKCDROM.SYS -Mscdex D:\dosfiles\MSCDEX.EXE
 #>
@@ -55,19 +56,21 @@ foreach ($name in 'xorriso', 'genisoimage', 'mkisofs') {
     if ($builder) { break }
 }
 if (-not $builder) { throw 'ISO creation needs xorriso, genisoimage or mkisofs on PATH.' }
-# the CD-ROM drive at boot: AHCIASPI.SYS and ASPICD.SYS of the -Extra
-# packages, else -CdDriver
+# the CD-ROM drive at boot: AHCIASPI.SYS with ASPICDA.SYS (OpenASPI, on the
+# AHCIASPI disk) or ASPICD.SYS (EZ-SCSI disk) of the -Extra packages, else
+# -CdDriver
 $Extra = @($Extra | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 $aspi = @{}
 foreach ($x in $Extra) {
     $xf = Read-ExtraFiles $x
-    foreach ($n in 'AHCIASPI.SYS', 'ASPICD.SYS') {
+    foreach ($n in 'AHCIASPI.SYS', 'ASPICDA.SYS', 'ASPICD.SYS') {
         if ($xf.Contains($n) -and -not $aspi.ContainsKey($n)) { $aspi[$n] = $xf[$n] }
     }
 }
-$useAspi = $aspi.Count -eq 2
+$cdAspi = if ($aspi.ContainsKey('ASPICDA.SYS')) { 'ASPICDA.SYS' } elseif ($aspi.ContainsKey('ASPICD.SYS')) { 'ASPICD.SYS' }
+$useAspi = $aspi.ContainsKey('AHCIASPI.SYS') -and $cdAspi
 if (-not $useAspi) {
-    if (-not $CdDriver) { throw 'The CD needs AHCIASPI.SYS and ASPICD.SYS in -Extra (the AHCIASPI and EZ-SCSI disks), or -CdDriver.' }
+    if (-not $CdDriver) { throw 'The CD needs AHCIASPI.SYS and ASPICDA.SYS (AHCIASPI disk 0.4) or ASPICD.SYS (EZ-SCSI disk) in -Extra, or -CdDriver.' }
     $driverFile = Get-Item -LiteralPath $CdDriver
 }
 $mscdexFile = Get-Item -LiteralPath $Mscdex
@@ -133,8 +136,8 @@ try {
     }
     $now = Get-Date
     if ($useAspi) {
-        foreach ($n in 'AHCIASPI.SYS', 'ASPICD.SYS') { $boot.AddFile($n, $aspi[$n].Data, $aspi[$n].Time, 0x20) }
-        $drivers = "DEVICE=A:\AHCIASPI.SYS`nDEVICE=A:\ASPICD.SYS /D:MSCD001"
+        foreach ($n in 'AHCIASPI.SYS', $cdAspi) { $boot.AddFile($n, $aspi[$n].Data, $aspi[$n].Time, 0x20) }
+        $drivers = "DEVICE=A:\AHCIASPI.SYS`nDEVICE=A:\$cdAspi /D:MSCD001"
     } else {
         $boot.AddFile('CDROM.SYS', [IO.File]::ReadAllBytes($driverFile.FullName), $driverFile.LastWriteTime, 0x20)
         $drivers = "DEVICE=A:\CDROM.SYS /D:MSCD001"

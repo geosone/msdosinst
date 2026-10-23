@@ -60,11 +60,13 @@
 .PARAMETER Iso
     Also create a bootable INSTALL.ISO in -Out. Requires xorriso,
     genisoimage or mkisofs on PATH.  The CD boots with AHCIASPI.SYS and
-    ASPICD.SYS of the -Extra disks (AHCIASPI, EZ-SCSI), else -CdDriver.
+    ASPICDA.SYS of the AHCIASPI disk (0.4 and later), or with ASPICD.SYS of
+    the EZ-SCSI disk, from -Extra; else with -CdDriver.
 
 .PARAMETER CdDriver
     DOS CD-ROM driver accepting /D:MSCD001 (e.g. OAKCDROM.SYS), for -Iso
-    when -Extra has no AHCIASPI.SYS and ASPICD.SYS.  Default: OAKCDROM.SYS
+    when -Extra has no AHCIASPI.SYS with ASPICDA.SYS or ASPICD.SYS.
+    Default: OAKCDROM.SYS
     found in -Source.
 
 .EXAMPLE
@@ -338,16 +340,18 @@ if ($List) {
 if (-not $Source) { throw "-Source is needed (folder with your CDs and disks); -List shows the files" }
 if ($missingRequired.Count) { throw ("Missing in {0}: {1}" -f $Source, ($missingRequired -join ', ')) }
 if ($Iso) {
-    # the boot disk of the CD: AHCIASPI.SYS and ASPICD.SYS of the -Extra
-    # packages, else -CdDriver (or OAKCDROM.SYS in -Source)
+    # the boot disk of the CD: AHCIASPI.SYS with ASPICDA.SYS (AHCIASPI disk
+    # 0.4) or ASPICD.SYS (EZ-SCSI disk) of the -Extra packages, else
+    # -CdDriver (or OAKCDROM.SYS in -Source)
     $hasAspi = @{}
-    foreach ($x in $Extra) { foreach ($k in (Read-ExtraFiles $x).Keys) { if ($k -in 'AHCIASPI.SYS', 'ASPICD.SYS') { $hasAspi[$k] = 1 } } }
-    if (-not $CdDriver -and $hasAspi.Count -lt 2) {
+    foreach ($x in $Extra) { foreach ($k in (Read-ExtraFiles $x).Keys) { if ($k -in 'AHCIASPI.SYS', 'ASPICDA.SYS', 'ASPICD.SYS') { $hasAspi[$k] = 1 } } }
+    $aspiCd = $hasAspi.ContainsKey('AHCIASPI.SYS') -and ($hasAspi.ContainsKey('ASPICDA.SYS') -or $hasAspi.ContainsKey('ASPICD.SYS'))
+    if (-not $CdDriver -and -not $aspiCd) {
         $driver = Find-SourceFile 'OAKCDROM.SYS'
         if ($driver) { $CdDriver = $driver.FullName }
     }
-    if ($hasAspi.Count -lt 2 -and (-not $CdDriver -or -not (Test-Path -LiteralPath $CdDriver -PathType Leaf))) {
-        throw '-Iso needs the CD-ROM drivers: -Extra with the AHCIASPI and EZ-SCSI disks (AHCIASPI.SYS, ASPICD.SYS), or -CdDriver <path to OAKCDROM.SYS>.'
+    if (-not $aspiCd -and (-not $CdDriver -or -not (Test-Path -LiteralPath $CdDriver -PathType Leaf))) {
+        throw '-Iso needs the CD-ROM drivers: -Extra with the AHCIASPI disk 0.4 (AHCIASPI.SYS, ASPICDA.SYS) or the AHCIASPI and EZ-SCSI disks (ASPICD.SYS), or -CdDriver <path to OAKCDROM.SYS>.'
     }
     if (-not (Get-Command xorriso, genisoimage, mkisofs -CommandType Application -ErrorAction SilentlyContinue)) {
         throw '-Iso needs xorriso, genisoimage or mkisofs on PATH.'
