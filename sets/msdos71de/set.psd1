@@ -203,6 +203,12 @@
            Old = '2F E8 31 EE 2B C9 B4 40 CD 21 B4 3E CD 21 A0 6F 31 A2 B3 32 B9 06 00 8D 16 B3 32 B4 3C CD 21 72 1E 93 B9 09 00 8B C1 33 D2 A3 77 2F 89 16 79 2F E8 02 EE BA C0 32 B4 40 CD'
            New = '8C 0E F4 2E 06 1F 89 FA 0E 07 BB E8 2E B8 00 4B CD 21 07 1F 61 F8 C3 43 4F 4D 53 50 45 43 3D 0A 20 2F 43 20 53 59 53 20 41 3A 0D 00 00 DC 2E 00 00 D4 2E 00 00 D4 2E 00 00' }
 
+        # Windows ME FORMAT.COM: /AUTOTEST (no questions, used by the setup)
+        # also writes the volume label of /V: (the label routine was skipped
+        # with /AUTOTEST or /8: TEST [310Ch],900h -> 100h); without /V: it
+        # now asks for the label as without /AUTOTEST
+        @{ Files = @('FORMAT.COM'); At = 0x77AA; Old = 'F7 06 0C 31 00 09 75 03 E8 DB F5'; New = 'F7 06 0C 31 00 01 75 03 E8 DB F5' }
+
         # MS-DOS instead of Windows in the titles and messages (references to
         # other systems such as Windows NT or Windows 3.x stay)
         @{ Files = @('FDISK.EXE'); At = 0x476; OldText = '                      Microsoft Windows Millennium '; NewText = '                          Microsoft MS-DOS 7.1     ' }
