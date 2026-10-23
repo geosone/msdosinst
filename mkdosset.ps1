@@ -21,6 +21,13 @@
     PATH, Program Files\7-Zip or tools\7zip of the release zip) into the
     folder -Cache.
 
+.PARAMETER Download
+    Download the media that are missing in -Source (or all, without
+    -Source) from WinWorld (sets\<set>\downloads.txt: the German CDs and
+    disks and the Microsoft Mouse disk, about 1.3 GB) into -Cache\download,
+    checked by SHA-256 and kept there for the next run.  You need a license
+    for each product.
+
 .PARAMETER Cache
     Folder for the unpacked images (default: mkdosset-cache in the temp
     folder).  It is kept, the next run uses it again.
@@ -72,12 +79,14 @@
 .EXAMPLE
     .\mkdosset.ps1 -List
     .\mkdosset.ps1 -Source D:\dos71files -Extra D:\ahciaspi
+    .\mkdosset.ps1 -Download -Iso -Extra AHCIASPI.IMG
 
     Copyright (C) 2026 GeosOne.  GNU General Public License version 3.
 #>
 [CmdletBinding()]
 param(
     [string]$Source,
+    [switch]$Download,
     [string]$Cache = (Join-Path ([IO.Path]::GetTempPath()) 'mkdosset-cache'),
     [string]$Out = (Join-Path (Get-Location) 'out'),
     [string]$Set = 'msdos71de',
@@ -233,9 +242,7 @@ function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
 
 # all files below $Source (and of its unpacked images) by name
 $index = @{}
-if ($Source) {
-    if (-not (Test-Path -LiteralPath $Source -PathType Container)) { throw "Folder not found: $Source" }
-    $files = @(Get-ChildItem -LiteralPath $Source -Recurse -File)
+function Add-SourceFiles([IO.FileInfo[]]$files) {
     foreach ($i in @($files | Where-Object { $_.Extension -in '.7z', '.iso', '.img', '.ima' })) {
         New-Item -ItemType Directory -Force -Path $Cache | Out-Null
         $files += @(Get-ChildItem -LiteralPath (Expand-SourceImage $i $Cache) -Recurse -File)
@@ -245,6 +252,10 @@ if ($Source) {
         if (-not $index.ContainsKey($k)) { $index[$k] = @() }
         $index[$k] += $f
     }
+}
+if ($Source) {
+    if (-not (Test-Path -LiteralPath $Source -PathType Container)) { throw "Folder not found: $Source" }
+    Add-SourceFiles @(Get-ChildItem -LiteralPath $Source -Recurse -File)
 }
 
 function Find-SourceFile([string]$name) {
@@ -303,6 +314,49 @@ function Find-MediumFile($s) {
     return Get-Item -LiteralPath $d
 }
 
+# --- downloads (-Download) --------------------------------------------------------
+
+# downloads.txt of the set: id  medium  sha256  url  file name (rest of the
+# line); a medium not found in -Source is downloaded into $Cache\download
+function Get-Download($d) {
+    $dir = Join-Path $Cache 'download'
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    $path = Join-Path $dir $d.File
+    if ((Test-Path -LiteralPath $path) -and (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -eq $d.Sha) { return $path }
+    Write-Host "Downloading $($d.File) ..."
+    $tmp = "$path.part"
+    for ($try = 1; ; $try++) {
+        try {
+            Invoke-WebRequest -Uri $d.Url -OutFile $tmp -UseBasicParsing
+            break
+        } catch {
+            if ($try -ge 3) { throw "Download failed: $($d.Url)`n$_" }
+            Start-Sleep -Seconds (5 * $try)
+        }
+    }
+    $sha = (Get-FileHash -LiteralPath $tmp -Algorithm SHA256).Hash
+    if ($sha -ne $d.Sha) {
+        Remove-Item -LiteralPath $tmp
+        throw "$($d.File): wrong SHA-256 $sha (expected $($d.Sha))"
+    }
+    Move-Item -LiteralPath $tmp -Destination $path -Force
+    return $path
+}
+if ($Download) {
+    $ProgressPreference = 'SilentlyContinue'   # Invoke-WebRequest of PowerShell 5.1 is slow with it
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    foreach ($l in (Get-Content -LiteralPath (Join-Path $setDir 'downloads.txt'))) {
+        if ($l -match '^\s*(#|$)') { continue }
+        if ($l -notmatch '^\s*(\S+)\s+(\S+)\s+([0-9a-fA-F]{64})\s+(\S+)\s+(.+?)\s*$') { throw "downloads.txt: invalid line: $l" }
+        $d = @{ Id = $Matches[1]; Medium = $Matches[2]; Sha = $Matches[3].ToUpperInvariant(); Url = $Matches[4]; File = $Matches[5] }
+        if (-not $def.Media[$d.Medium]) { throw "downloads.txt: unknown medium $($d.Medium)" }
+        if (Get-MediumRoot $d.Medium) { continue }
+        Add-SourceFiles @(Get-Item -LiteralPath (Get-Download $d))
+        $mediaRoot.Clear()
+    }
+}
+$haveSource = [bool]($Source -or $Download)
+
 function Test-Spec($s) {
     if ($s.Medium) { return [bool](Find-MediumFile $s) }
     return [bool](Find-SourceFile $s.Path)
@@ -312,12 +366,12 @@ $missingRequired = @()
 $skipGroup = @{}
 foreach ($g in $groups) {
     $specs = @($g.Files | ForEach-Object { Get-Spec $_ $g.Medium })
-    $missing = @($specs | Where-Object { $Source -and -not (Test-Spec $_) } | ForEach-Object {
+    $missing = @($specs | Where-Object { $haveSource -and -not (Test-Spec $_) } | ForEach-Object {
         if ($_.Medium) { "$($_.Medium):$($_.Path)" } else { $_.Path } } | Select-Object -Unique)
     if ($List) {
         Write-Host ("{0}{1}  - from: {2}" -f $g.Name, $(if ($g.Optional) { ' (optional)' } else { '' }), $g.From)
         foreach ($s in $specs) {
-            $mark = if (-not $Source) { '  ' } elseif (-not (Test-Spec $s)) { '- ' } else { '+ ' }
+            $mark = if (-not $haveSource) { '  ' } elseif (-not (Test-Spec $s)) { '- ' } else { '+ ' }
             $n = if ($s.Medium) { "$($s.Path)$(if ($s.Member) { " > $($s.Member)" })" } else { $s.Path }
             Write-Host "  $mark$n"
         }
@@ -332,14 +386,15 @@ foreach ($g in $groups) {
     }
 }
 if ($List) {
-    if ($Source) { Write-Host "`n+ = found in $Source, - = missing" }
+    if ($haveSource) { Write-Host "`n+ = found$(if ($Source) { " in $Source" }), - = missing" }
     if ($def.Media) {
         Write-Host "`nCDs: put their images (*.iso, *.7z) into -Source, or copy them (or the folders named above), keeping the folders:"
         foreach ($k in $def.Media.Keys) { Write-Host ("  {0}: {1} (found by {2})" -f $k, $def.Media[$k].Name, $def.Media[$k].Find) }
+        Write-Host "-Download fetches the missing ones from WinWorld (sets\$Set\downloads.txt)."
     }
     return
 }
-if (-not $Source) { throw "-Source is needed (folder with your CDs and disks); -List shows the files" }
+if (-not $haveSource) { throw "-Source (folder with your CDs and disks) or -Download is needed; -List shows the files" }
 if ($missingRequired.Count) { throw ("Missing in {0}: {1}" -f $Source, ($missingRequired -join ', ')) }
 if ($Iso) {
     # the boot disk of the CD: AHCIASPI.SYS with ASPICDA.SYS (AHCIASPI disk

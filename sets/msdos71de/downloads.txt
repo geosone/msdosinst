@@ -1,0 +1,10 @@
+# Downloads of mkdosset.ps1 -Download (WinWorld, winworldpc.com): id, the
+# medium of set.psd1 the archive holds (downloaded only when that medium is
+# not in -Source), SHA-256, URL, file name in the cache (the rest of the
+# line).  You need a license for each product.
+
+dos622de   Dos622   36812c89421f7d062c83bcec84eef2f7236ac06b0deefeb1a77d07e20c85f576  https://winworldpc.com/download/2379c3a9-1008-c2ae-11c3-a7cb86c2bd52/from/c39ac2af-c381-c2bf-1b25-11c3a4e284a2  Microsoft MS-DOS 6.22 [German] (3.5-1.44mb).7z
+win95de    Win95    7117b240b1441ca74ca32bc1df0903b9eeaf84b284093d7a09c85314051a1989  https://winworldpc.com/download/56abc739-e7c8-11e9-841c-fa163e9022f0/from/c39ac2af-c381-c2bf-1b25-11c3a4e284a2  Microsoft Windows 95 [German] (OEM) (ISO).7z
+win98sede  Win98se  96c68c5bd6ba23e20f58c39ffee6c595108bdb2c213927b45d31e331e9b16f98  https://winworldpc.com/download/c5bee280-b9c2-9de2-809e-1dc2ae11c3a7/from/c39ac2af-c381-c2bf-1b25-11c3a4e284a2  Microsoft Windows 98 Second Edition (4.10.2222) [German] (ISO).7z
+winmede    WinMe    e2f3aa155f35be791f47926e677eee14e51ebc6d063ac817c4a60521b0c25862  https://winworldpc.com/download/24e280a1-e280-9a6b-7c48-11c3a5c28f13/from/c39ac2af-c381-c2bf-1b25-11c3a4e284a2  Microsoft Windows ME [German](2iso).7z
+mouse11    Mouse11  c19cf1abfa9fff279328c582d37220a788e101a54aa64882a4c1616ed2642d21  https://winworldpc.com/download/45c399c3-b21c-18c3-9a11-c3a4e284a2ef/from/c39ac2af-c381-c2bf-1b25-11c3a4e284a2  Microsoft Mouse 11.0 (3.5).7z

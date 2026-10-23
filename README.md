@@ -20,14 +20,17 @@ PowerShell 5.1 (Windows) or PowerShell 7 (Windows, Linux). The **release zip** (
     .\mkdosset.ps1 -List -Source D:\dosfiles   # ... and which are missing
     .\mkdosset.ps1 -Source D:\dosfiles -Extra AHCIASPI.IMG, EUSBASPI.IMG
     .\mkdosset.ps1 -Source D:\dosfiles -Iso -Extra AHCIASPI.IMG, EUSBASPI.IMG
+    .\mkdosset.ps1 -Download -Iso -Extra AHCIASPI.IMG, EUSBASPI.IMG   # media from WinWorld
 
 1. Put your German Windows ME, Windows 98 SE and Windows 95 CDs and your MS-DOS 6.22 disks (with the Supplemental Disk), optionally the Microsoft Mouse 11.0 disk, into one folder (subfolders are fine): as images (`*.iso`, `*.img`, or 7-Zip archives `*.7z` of them, e.g. `Windows ME.CD1.iso` and `Disk01.img` ... `Disk04 - Supplemental.img` - the script unpacks them with [7-Zip](https://www.7-zip.org/) into `-Cache` and keeps them there for the next run), or as files: the folders `WIN9X` and `TOOLS\OLDMSDOS` of the ME CD, `WIN98` of the 98 SE CD, `OTHER\OLDMSDOS` of the 95 CD (keep the folders) and the files of the disks (disk 1 in its own folder: the Supplemental Disk has another `EXPAND.EXE`). **[FILES.md](FILES.md) lists every file the set needs, with its place on the CD (CAB) and its size** (`-List` shows the same). The script extracts the files from the CABs (cabextract on Linux - `ext\small-io-sys\tools`, `expand.exe` on Windows). `IO.SYS` and `COMMAND.COM` come from `WIN98\PRECOPY1.CAB` and `PRECOPY2.CAB` of the Windows 98 SE CD (see below), `MSDOS.SYS` is written by the script.
+   Or let the script download them: `-Download` fetches every medium that is missing in `-Source` (all of them without `-Source`) from [WinWorld](https://winworldpc.com): MS-DOS 6.22 [German], Windows 95 [German] (OEM) (ISO), Windows 98 Second Edition [German] (OEM), Windows ME [German] and Microsoft Mouse 11.0, about 1.3 GB (`sets\msdos71de\downloads.txt`). They go to `-Cache\download`, are checked by SHA-256 and kept for the next run. You still need a license for each product.
 2. Run the script: it writes `out\DISK1.IMG` ... `DISK4.IMG` and for each `-Extra` package (a folder or disk image with an `INSTALL.INI`) an `EXTRAn.IMG`.
 3. Write the images to floppy disks (RawWrite, WinImage, `dd`) or use them in an emulator.
 
 | Parameter | |
 |---|---|
 | `-Source` | folder with your CDs and disks (images, 7-Zip archives or files) |
+| `-Download` | download the media missing in `-Source` from WinWorld (`downloads.txt` of the set) |
 | `-Cache` | folder for the unpacked images (default `mkdosset-cache` in the temp folder) |
 | `-Out` | output folder (default `.\out`) |
 | `-Set` | disk set in `sets\` (default `msdos71de`) |
@@ -84,6 +87,7 @@ another filename and `-Extra <folders or images>` to include additional packages
 | `LIESMICH.TXT` | readme |
 | `format-s.asm` | source of the `FORMAT /S` patch (in `set.psd1`) |
 | `mouse-ps2.asm` | source of the PS/2 patch of `MOUSE.EXE` (in `set.psd1`) |
+| `downloads.txt` | the WinWorld downloads of `-Download`: medium, SHA-256, URL, file name |
 | `mouse-de.lan` | German messages of `MOUSE.EXE`, written as `MOUSE.LAN` (`Texts` in `set.psd1`) |
 
 Options of the setup: HIMEM.SYS, EMM386.EXE (NOEMS), German keyboard and country, MS-DOS Shell (VGA), MS-DOS 5.0/6.22 utilities, Windows 95 MS-DOS utilities (MEMMAKER, MSBACKUP, ...), AccessDOS, keyboard utilities, DRVBOOT, MS-DOS 6.22 network files, Windows 3.x programs of MS-DOS 6.22 (MWBACKUP, MWAV, MWUNDEL, SMARTMON; off by default), SHARE (`INSTALL=` in `CONFIG.SYS`, off by default; MS-DOS 7.1 has no SHARE of its own, Windows 3.x wants it), the Microsoft mouse driver in `AUTOEXEC.BAT` (when the mouse disk was in `-Source`).
