@@ -1,0 +1,227 @@
+~~ Deutsche Texte für MOUSE.EXE (Microsoft Mouse 11.0), GeosOne msdosinst
+~~ to test copy this file to mouse.lan and run mouse
+~~ all strings can be up to 80 characters
+
+~~ Rows = 1
+MSG_START
+Microsoft (R) Maustreiber Version 
+
+~~ Rows =  1
+MSG_START_2
+Copyright (C) Microsoft Corp. 1983-1995. Alle Rechte vorbehalten.
+
+
+~~ Rows = 3
+MSG_ERR_PARM
+Ungültiger Parameter '%s'. Korrigieren Sie die Befehlszeile.
+Mit MOUSE /? werden die gültigen Optionen angezeigt.
+
+
+
+~~ Rows = 3
+MSG_ERR_NOTFND
+Microsoft Maus nicht gefunden. Versuchen Sie einen anderen seriellen
+Anschluss (9 oder 25 Pins) und prüfen Sie Interruptkonflikte mit anderen
+Geräten. Mit MOUSE /F werden alle Anschlüsse durchsucht.
+
+
+
+
+~~ Rows = 3
+MSG_ERR_INTRPT_MISS
+Interruptkonflikt. Ändern Sie den Jumper J4 auf der InPort-Buskarte.
+Siehe die Installationskarte der Microsoft Busmaus zum Ändern
+des Jumpers.
+
+~~ Rows = 1
+MSG_ERR_INTRPT_MULT
+Interruptkonflikt. Ändern Sie den Jumper auf der InPort-Karte.
+
+~~ Rows = 1
+MSG_END_MSX
+$
+
+~~ Rows = 1
+MSG_END
+Maustreiber installiert
+
+~~ Rows = 1
+MSG_SWT
+Optionen an den geladenen Treiber übergeben
+
+~~ Rows = 1
+MSG_ENABLED
+Maustreiber wieder aktiviert
+
+~~ Rows = 1
+MSG_REMOVED
+Geladener Treiber aus dem Speicher entfernt
+
+~~ Rows = 1
+MSG_DISABLED
+Maustreiber deaktiviert, bleibt aber im Speicher
+
+~~ Rows = 1
+MSG_ERR_REMOVED
+Der Maustreiber ist nicht im Speicher
+
+~~ Rows = 2
+MSG_ERR_CHG_PORT
+Die Änderungen wurden in MSINPUT.INI gespeichert.
+Starten Sie den Computer neu, damit sie wirksam werden.
+
+~~ Rows = 1
+MSG_ERR_INSTALLED
+Treiber ist bereits installiert
+
+~~ Rows = 1
+MSG_CNTL_NO_DSBL
+Treiber kann nicht deaktiviert werden -- Systemsteuerung ist aktiv
+
+~~ Rows = 1
+MSG_MENU_NO_DISBALE
+Treiber kann nicht deaktiviert werden -- Mausmenü ist aktiv
+
+~~ ROWS = 1
+MSG_NOT_SUPPORTED
+Maustreiber installiert. Die Parameter /U, /E, /X gibt es nicht mehr.
+
+~~ ROWS = 3
+MSG_ERR_INDOSBOX
+Der Maustreiber für MS-DOS kann nicht in einer MS-DOS-Eingabeaufforderung
+unter Windows geladen werden. Beenden Sie Windows, um ihn zu laden.
+
+
+~~ Rows = 23
+MSG_MOUSE_SW_INFO
+
+MOUSE [Optionen]
+on     Maus aktivieren
+off    Maus deaktivieren
+/B     Busmaus
+/Cn    Serielle Maus an COM (1,2)
+/E     Maustreiber in den konventionellen Speicher laden
+/F     Zeigegerät suchen
+/Hn    Horizontale Empfindlichkeit (5-100)
+/In    InPort-Maus (1,2)
+/KPnSm Tastenbelegung, P-primär, S-sekundär (1-4)
+/K     KlickEinrasten - /KC (ein), /K (aus)
+/Mn    Standard-Mauszeiger - /M1 (ein), /M (aus)
+/Nn    Zeigerverzögerung (0-10)
+/Or    Drehwinkel (0-359)
+/Q     Treiber ohne Meldungen laden
+/Rn    Abfragerate (1-4)
+/Sn    Horizontale und vertikale Empfindlichkeit (5-100)
+/Vn    Vertikale Empfindlichkeit (5-100)
+/Y     Hardware-Mauszeiger ausschalten
+/Z     PS/2-Maus
+
+
+
+
+
+~~ The following four strings should only be 15 characters.
+~~ Rows = 1 
+AccelProfile1Str
+Niedrig
+
+~~ Rows = 1
+AccelProfile2Str
+Mittel
+
+~~ Rows = 1
+AccelProfile3Str
+Hoch
+
+~~ Rows = 1
+AccelProfile4Str
+Unbeschleunigt
+
+
+~~ Rows = 1
+GeneralEnableStr
+aktiviert
+
+
+~~ Rows = 1
+SerialEnableStr
+aktiviert an COM
+
+
+~~ Rows = 1
+InPortEnableStr
+aktiviert an InPort
+
+
+
+~~ Rows = 1
+BUSNAMESTRING
+Busmaus
+
+~~ Rows = 1
+SERIALNAMESTRING
+Serielle Maus
+
+~~ Rows = 1
+SERIALBALLPOINTNAMESTRING
+Serielle BallPoint-Maus
+
+~~ Rows = 1
+SERIALEASYBALLNAMESTRING
+Serieller EasyBall
+
+~~ Rows = 1
+PS2NAMESTRING
+Maus am Mausanschluss
+
+~~ Rows = 1
+PS2BALLPOINTNAMESTRING
+BallPoint-Maus am Mausanschluss
+
+~~ Rows = 1
+PS2PHOENIXFLAGSTRING
+PhoenixBIOS
+
+~~ Rows = 1
+PS2EXTENDEDBIOSSTRING
+FailIfNoExtendedBIOS
+
+~~ Rows = 1
+FALSESTRING
+FALSE
+
+~~ Rows = 1
+TRUESTRING
+TRUE
+
+~~ Rows = 1
+PENNAMESTRING
+Grafiktablett
+
+~~ Rows = 1
+INPORTNAMESTRING
+InPort-Maus
+
+~~ Rows = 1
+HPMOUSENAMESTRING
+HP-Maus
+
+~~ Rows = 1
+HPMOUSEBALLPOINTNAMESTRING
+HP-BallPoint-Maus
+
+~~ Rows = 1
+DEVICESTRING
+Device
+
+~~ Rows = 1
+MOUSESTRING
+Mouse
+
+~~ Rows = 1
+BALLPTSTRING
+Ballpoint
+
+
+
+~~ ROWS = 0

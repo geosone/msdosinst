@@ -406,8 +406,12 @@ function Get-PatchBytes($p, [string]$key) {
 
 # patch the files of the set's Patches table: at offset At, or where the
 # old bytes occur exactly once (or Count times: all of them); a shorter new
-# text is padded with NULs
+# text is padded with NULs.  Texts of the set (Texts: name -> file in the
+# set folder, e.g. a translation) replace the file of the media
 function Set-Patch([string]$name, $f) {
+    if ($def.Texts -and $def.Texts[$name]) {
+        $f = [pscustomobject]@{ Name = $f.Name; Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir $def.Texts[$name]))); Time = $f.Time }
+    }
     foreach ($p in @($def.Patches)) {
         if ($p.Files -notcontains $name) { continue }
         $old = Get-PatchBytes $p 'Old'

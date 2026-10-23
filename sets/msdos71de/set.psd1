@@ -135,6 +135,11 @@
                      '2X_' = '2XE'; 'DO_' = 'DOS'; 'LS_' = 'LST'; 'DL_' = 'DLL'; '38_' = '386' }
     ExpandNames = @{ 'DRVBOOT.BA_' = 'DRVBOOT.BAT'; 'WNTOOLS.GR_' = 'WNTOOLS.GRP' }
 
+    # Texts of the set in place of those of the media (code page 850, CR LF):
+    # MOUSE.LAN, the messages of MOUSE.EXE, in German (MOUSE.EXE reads the
+    # MOUSE.LAN next to it; the keys and the number of lines stay)
+    Texts = @{ 'MOUSE.LAN' = 'mouse-de.lan' }
+
     # Patches: Old/New in hex or OldText/NewText (code page 850), at offset
     # At or where Old occurs exactly once (Count = that many times, all)
     Patches = @(
