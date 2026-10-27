@@ -15,6 +15,53 @@ using System.Text;
 
 namespace GeosOne.Gdi
 {
+	// PKLITE 1.x small, non-extra compression. Only the pinned SYS.COM uses it.
+	// Huffman tables/format from Deark (Jason Summers), MIT; see PKLITE-LICENSE.txt.
+	public sealed class PkLiteSmall
+	{
+		static readonly int[] Lengths = { 0x2000,0x3004,0x3005,0x400c,0x400d,0x400e,0x400f,0x3003,0x3002 };
+		static readonly int[] Offsets = { 0x1001,0x4000,0x4001,0x5004,0x5005,0x5006,0x5007,0x6010,
+			0x6011,0x6012,0x6013,0x6014,0x6015,0x6016,0x702e,0x702f,0x7030,0x7031,
+			0x7032,0x7033,0x7034,0x7035,0x7036,0x7037,0x7038,0x7039,0x703a,0x703b,0x703c,0x703d,0x703e,0x703f };
+		byte[] input;
+		int pos, bits, count;
+		int Byte() { if (pos >= input.Length) throw new InvalidDataException("Truncated PKLITE stream"); return input[pos++]; }
+		void Fill() { bits = Byte() | Byte() << 8; count = 16; }
+		int Bit() { int b = bits & 1; bits >>= 1; if (--count == 0) Fill(); return b; }
+		int Code(int[] table) {
+			int code = 0;
+			for (int len = 1; len <= 9; len++) {
+				code = code << 1 | Bit();
+				for (int i = 0; i < table.Length; i++) if (table[i] == (len << 12 | code)) return i;
+			}
+			throw new InvalidDataException("Invalid PKLITE code");
+		}
+		public static byte[] Expand(byte[] input, int start, int size) {
+			var d = new PkLiteSmall { input = input, pos = start };
+			var output = new List<byte>(size);
+			d.Fill();
+			for (;;) {
+				if (d.Bit() == 0) { output.Add((byte)d.Byte()); }
+				else {
+					int code = d.Code(Lengths), len, high = 0;
+					if (code == 7) {
+						int value = d.Byte();
+						if (value == 255) break;
+						if (value >= 253) throw new InvalidDataException("Unsupported PKLITE marker");
+						len = value + 10;
+					} else { len = code == 8 ? 2 : code + 3; }
+					if (len != 2) high = d.Code(Offsets);
+					int distance = high << 8 | d.Byte();
+					if (distance == 0 || distance > output.Count) throw new InvalidDataException("Invalid PKLITE distance");
+					for (int i = 0; i < len; i++) output.Add(output[output.Count - distance]);
+				}
+				if (output.Count > size) throw new InvalidDataException("PKLITE output exceeds expected size");
+			}
+			if (output.Count != size) throw new InvalidDataException("Unexpected PKLITE output size");
+			return output.ToArray();
+		}
+	}
+
 	public static class Crc32
 	{
 		static readonly uint[] table = MakeTable();
@@ -82,7 +129,6 @@ namespace GeosOne.Gdi
 		{
 			if (boot != null && boot.Length >= 512) {
 				Array.Copy(boot, img, 512);
-				Encoding.ASCII.GetBytes("MSWIN4.1").CopyTo(img, 3);   // as Win9x FORMAT/SYS
 			} else
 				WriteNoSystemBoot();
 			byte[] bpb = {

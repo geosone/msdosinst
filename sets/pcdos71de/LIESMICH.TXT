@@ -1,0 +1,28 @@
+PC-DOS 7.1 Deutsch
+
+Deutsche PC-DOS-2000-Programme mit dem FAT32-Kern aus IBM ServerGuide
+Scripting Toolkit DOS Edition 1.3.07.
+
+FDISK.COM bietet ein deutsches Menü für IBM FDISK32 mit frei eingebbarer
+Größe in MB. FDISK16.COM ist das originale deutsche FDISK ohne FAT32.
+FORMAT.COM wählt für C: nach Partitionstyp FORMAT16 oder FORMAT32.
+FORMAT16.COM ist das deutsche Original; unter 7.1 über FORMAT.COM aufrufen.
+SYS32.COM überträgt das System auf FAT16/FAT32, ohne erneut zu formatieren.
+Die Setup-Helfer unterstützen C: auf der ersten primären DOS-Partition
+der ersten BIOS-Festplatte. Nach dem Partitionieren neu starten.
+
+COMMAND, APPEND und SYS haben angepasste Versionsprüfungen.
+Der deutsche IBM-Maustreiber unterstützt PS/2 ohne weiteren Patch.
+Die neuen Kernel- und FAT32-Meldungen sind übersetzt; bei den Bootfragen
+steht Y für Ja und N für Nein.
+
+CD-Unterstützung: SHSUCDX aus dem AHCIASPI-Zusatzpaket. Das alte IBM-MSCDEX
+wird nicht mitgeliefert, weil es beim Laden unter dem neuen Kern hängt.
+DEFRAG, CHKDSK, UNFORMAT, UNDELETE und SMARTDRV werden wegen nicht
+nachgewiesener FAT32-Verträglichkeit nicht mitgeliefert.
+
+SHARE ist nicht enthalten: Nach seinem Laden hängen Dateizugriffe mit
+diesem Kern trotz angepasster Versionsprüfung.
+
+Dies ist ein kombinierter Diskettensatz dieses Projekts, keine offizielle
+IBM-Ausgabe von PC-DOS 7.1 Deutsch. Es gelten die IBM-Lizenzbedingungen.

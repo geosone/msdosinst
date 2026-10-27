@@ -1,4 +1,18 @@
-# msdosinst - MS-DOS 7.1 disk set with the GeosOne Dual Installer
+# msdosinst - MS-DOS and German PC-DOS installation disk sets
+
+A German **PC-DOS 7.1** set is also available: PC-DOS 2000 German programs
+with the FAT32 kernel from IBM ServerGuide Scripting Toolkit DOS 1.3.07.
+It has a German interactive FDISK menu and keeps the original German
+FDISK and FORMAT as `FDISK16.COM` and `FORMAT16.COM`.
+
+```powershell
+./mkdosset.ps1 -Set pcdos71de -Download -Out ./out/pcdos71de
+./mkdosset.ps1 -Set pcdos71de -Download -Out ./out/pcdos71de -Iso -Extra AHCIASPI.IMG
+```
+
+See [PC-DOS instructions](sets/pcdos71de/README.md) for sources,
+dependencies, compatibility patches and [tests](sets/pcdos71de/TESTED.md).
+The default set remains `msdos71de`; the MS-DOS instructions follow below.
 
 `mkdosset.ps1` builds a set of bootable 1.44 MB floppy images that install MS-DOS 7.1 with the [GeosOne Dual Installer](https://github.com/geosone/gdi):
 
@@ -10,7 +24,7 @@
 
 The set replaces MS-DOS 6.22 and its Supplemental Disk with the newest MS-DOS programs of Windows ME and Windows 98 SE (the system is MS-DOS 7.1 of Windows 98 SE), plus the MS-DOS 6.22 and Windows 95 "OLDMSDOS" programs that are not in them (DEFRAG is left out: the 6.22 one knows neither long file names nor FAT32, those of Windows 95/98/ME run only under Windows) and the Windows 3.x programs of MS-DOS 6.22, and the Microsoft mouse driver (Mouse 11.0, patched for PS/2 mice with today's BIOSes). The files are packed with deflate and fit on 4 disks. Of the CD-ROM and SCSI drivers only `MSCDEX.EXE` is in the set: the drivers come as extra disks (`-Extra`), [AHCIASPI](https://github.com/geosone/ahciaspi) for SATA/IDE and [EUSBASPI](https://github.com/geosone/eusbaspi) for USB drives, which bring the [OpenASPI](https://github.com/geosone/OpenAspi) drivers (`ASPICDA.SYS`, `ASPIDSK.SYS`, `ASPIFDD.SYS`, `ASPITAP.SYS`) and SHSUCDX since 0.4. `ASPICD.SYS`/`ASPIDISK.SYS` of your own Adaptec EZ-SCSI CD ([ezscsi](https://github.com/geosone/ezscsi)) still work as another extra disk.
 
-**This project contains no Microsoft programs.** You need your own, licensed CDs and disks; the script takes the files from them. The setup shows, one after another, a notice (`LIZENZ.TXT`, or your own text with `-Eula`) and the Microsoft license terms of Windows ME, Windows 98 SE and Windows 95 (from `PRECOPY1.CAB` of the German CDs) and of MS-DOS 6.22 (the OEM license printed in the MS-DOS 6.22 User's Guide; the disks contain none).
+**This project contains no Microsoft or IBM programs.** You need your own, licensed CDs and disks; the script takes the files from them. The setup shows, one after another, a notice (`LIZENZ.TXT`, or your own text with `-Eula`) and the Microsoft license terms of Windows ME, Windows 98 SE and Windows 95 (from `PRECOPY1.CAB` of the German CDs) and of MS-DOS 6.22 (the OEM license printed in the MS-DOS 6.22 User's Guide; the disks contain none).
 
 ## Use
 

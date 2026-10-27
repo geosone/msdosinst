@@ -18,7 +18,7 @@
 param(
     [string]$Disks = (Join-Path (Get-Location) 'out'),
     [string]$CdDriver,
-    [Parameter(Mandatory = $true)][string]$Mscdex,
+    [string]$Mscdex,
     [string]$Iso,
     [string[]]$Extra = @()
 )
@@ -63,7 +63,7 @@ $Extra = @($Extra | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 $aspi = @{}
 foreach ($x in $Extra) {
     $xf = Read-ExtraFiles $x
-    foreach ($n in 'AHCIASPI.SYS', 'ASPICDA.SYS', 'ASPICD.SYS') {
+    foreach ($n in 'AHCIASPI.SYS', 'ASPICDA.SYS', 'ASPICD.SYS', 'SHSUCDX.COM') {
         if ($xf.Contains($n) -and -not $aspi.ContainsKey($n)) { $aspi[$n] = $xf[$n] }
     }
 }
@@ -73,10 +73,13 @@ if (-not $useAspi) {
     if (-not $CdDriver) { throw 'The CD needs AHCIASPI.SYS and ASPICDA.SYS (AHCIASPI disk 0.4) or ASPICD.SYS (EZ-SCSI disk) in -Extra, or -CdDriver.' }
     $driverFile = Get-Item -LiteralPath $CdDriver
 }
-$mscdexFile = Get-Item -LiteralPath $Mscdex
+$shsucdx = $aspi['SHSUCDX.COM']
+if (-not $shsucdx -and -not $Mscdex) { throw 'CD boot needs SHSUCDX.COM in -Extra or -Mscdex <MSCDEX.EXE>.' }
+$mscdexFile = if (-not $shsucdx) { Get-Item -LiteralPath $Mscdex }
 $firstPath = Join-Path $Disks 'DISK1.IMG'
 $first = [GeosOne.Gdi.Fat12Reader]::new([IO.File]::ReadAllBytes($firstPath))
-foreach ($name in 'IO.SYS', 'MSDOS.SYS', 'COMMAND.COM', 'INSTALL.EXE', 'INSTALL.INI') {
+$systemFiles = if ($first.Files.ContainsKey('IBMBIO.COM')) { @('IBMBIO.COM', 'IBMDOS.COM', 'COMMAND.COM') } else { @('IO.SYS', 'MSDOS.SYS', 'COMMAND.COM') }
+foreach ($name in ($systemFiles + @('INSTALL.EXE', 'INSTALL.INI'))) {
     if (-not $first.Files.ContainsKey($name)) { throw "$firstPath is missing $name" }
 }
 $stage = Join-Path ([IO.Path]::GetTempPath()) ('mkdosiso-' + [guid]::NewGuid().ToString('N'))
@@ -131,17 +134,26 @@ try {
     }
     # El Torito floppy emulation keeps the boot medium on A:, leaving C:
     # available for the real hard disk. All archive parts live on the CD.
-    $boot = [GeosOne.Gdi.Fat12Image]::new([GeosOne.Gdi.BootSectors]::Win9xFat12, 'MSDOS71 CD', 0x714344)
-    foreach ($name in 'IO.SYS', 'MSDOS.SYS', 'COMMAND.COM') {
-        $attr = if ($name -eq 'COMMAND.COM') { 0x20 } else { 7 }
-        $boot.AddFile($name, $first.Files[$name], $first.Times[$name], [byte]$attr)
-    }
+    $boot = [GeosOne.Gdi.Fat12Image]::new(([IO.File]::ReadAllBytes($firstPath)[0..511]), "$base CD", 0x714344)
+    $bootNames = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+    foreach ($name in $systemFiles) { [void]$bootNames.Add($name) }
     foreach ($m in [regex]::Matches($ini, '(?m)^(?:Fdisk|Format)=A:\\(\S+)')) {
-        $name = $m.Groups[1].Value.ToUpperInvariant()
-        if ($first.Files.ContainsKey($name)) { $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20) }
+        [void]$bootNames.Add($m.Groups[1].Value.ToUpperInvariant())
     }
-    if ($first.Files.ContainsKey('KEYB.COM') -and $first.Files.ContainsKey('KEYBOARD.SYS')) {
-        foreach ($name in 'KEYB.COM', 'KEYBOARD.SYS') { $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20) }
+    # PC-DOS wrappers, FAT32 system transfer helper and boot template.
+    foreach ($name in $first.Files.Keys) {
+        if ($name -match '\.(BAT|COM)$' -and $name -ne 'AUTOEXEC.BAT') { [void]$bootNames.Add($name) }
+    }
+    if ($first.Files.ContainsKey('BOOT32.BIN')) { [void]$bootNames.Add('BOOT32.BIN') }
+    foreach ($name in 'KEYB.COM', 'KEYBOARD.SYS') {
+        if ($first.Files.ContainsKey($name)) { [void]$bootNames.Add($name) }
+    }
+    # Kernel files must remain the first root entries for the IBM loader.
+    foreach ($name in @($systemFiles) + @($bootNames | Where-Object { $systemFiles -notcontains $_ })) {
+        if ($first.Files.ContainsKey($name)) {
+            $attr = if ($name -in 'IO.SYS', 'MSDOS.SYS', 'IBMBIO.COM', 'IBMDOS.COM') { 7 } else { 0x20 }
+            $boot.AddFile($name, $first.Files[$name], $first.Times[$name], [byte]$attr)
+        }
     }
     $now = Get-Date
     if ($useAspi) {
@@ -151,7 +163,13 @@ try {
         $boot.AddFile('CDROM.SYS', [IO.File]::ReadAllBytes($driverFile.FullName), $driverFile.LastWriteTime, 0x20)
         $drivers = "DEVICE=A:\CDROM.SYS /D:MSCD001"
     }
-    $boot.AddFile('MSCDEX.EXE', [IO.File]::ReadAllBytes($mscdexFile.FullName), $mscdexFile.LastWriteTime, 0x20)
+    if ($shsucdx) {
+        $boot.AddFile('SHSUCDX.COM', $shsucdx.Data, $shsucdx.Time, 0x20)
+        $cdLoader = 'A:\SHSUCDX.COM'
+    } else {
+        $boot.AddFile('MSCDEX.EXE', [IO.File]::ReadAllBytes($mscdexFile.FullName), $mscdexFile.LastWriteTime, 0x20)
+        $cdLoader = 'A:\MSCDEX.EXE'
+    }
     $config = "FILES=30`nBUFFERS=20`nLASTDRIVE=Z`n$drivers"
     $boot.AddFile('CONFIG.SYS', (Get-DosBytes $config), $now, 0x20)
     # Keep the lines of the disk set's AUTOEXEC.BAT before the setup (KEYB,
@@ -163,18 +181,18 @@ try {
             if (-not $line -or $line -ieq '@ECHO OFF' -or $line -match '(?i)^A:\\INSTALL\.EXE') { continue }
             if ($line -match '(?i)^A:\\(\w+)\.(?:EXE|COM)\b') {
                 foreach ($name in @($first.Files.Keys | Where-Object { $_ -like "$($Matches[1].ToUpperInvariant()).*" })) {
-                    $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20)
+                    if ($bootNames.Add($name)) { $boot.AddFile($name, $first.Files[$name], $first.Times[$name], 0x20) }
                 }
             }
             $before += $line + "`n"
         }
     }
-    $auto = "@ECHO OFF`n${before}A:\MSCDEX.EXE /D:MSCD001 /L:R`nIF NOT EXIST R:\SETUP\INSTALL.INI GOTO NOCD`nSET PATH=A:\;R:\SETUP`nR:`nCD \SETUP`nR:\SETUP\INSTALL.EXE`nGOTO END`n:NOCD`nECHO Installation CD not found. Check the CD-ROM driver.`n:END"
+    $auto = "@ECHO OFF`n${before}$cdLoader /D:MSCD001 /L:R`nIF NOT EXIST R:\SETUP\INSTALL.INI GOTO NOCD`nSET PATH=A:\;R:\SETUP`nR:`nCD \SETUP`nR:\SETUP\INSTALL.EXE`nGOTO END`n:NOCD`nECHO Installation CD not found. Check the CD-ROM driver.`n:END"
     $boot.AddFile('AUTOEXEC.BAT', (Get-DosBytes $auto), $now, 0x20)
     $boot.Save((Join-Path $stage 'BOOT.IMG'))
     $isoPath = [IO.Path]::GetFullPath($Iso)
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $isoPath) | Out-Null
-    $args = @('-iso-level', '1', '-V', 'MSDOS71', '-b', 'BOOT.IMG', '-c', 'BOOT.CAT', '-o', $isoPath, $stage)
+    $args = @('-iso-level', '1', '-V', $base, '-b', 'BOOT.IMG', '-c', 'BOOT.CAT', '-o', $isoPath, $stage)
     if ($builder.Name -match '^xorriso') { $args = @('-as', 'mkisofs') + $args }
     & $builder.Source @args
     if ($LASTEXITCODE -ne 0) { throw "ISO builder failed (exit $LASTEXITCODE)." }

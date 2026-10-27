@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds an MS-DOS installation disk set (1.44 MB floppy images) with the
+    Builds an MS-DOS or PC-DOS installation disk set (1.44 MB floppy images) with the
     GeosOne Dual Installer from your own CDs and MS-DOS disks.
 
 .DESCRIPTION
@@ -11,7 +11,7 @@
     and formats the hard disk if needed, installs MS-DOS and then offers to
     install further software from other disks (their INSTALL.INI).
 
-    The script contains no Microsoft files.  You need your own, licensed
+    The script contains no Microsoft or IBM files.  You need your own, licensed
     copy of the CDs and disks.  -List shows the files the set needs.
 
 .PARAMETER Source
@@ -180,6 +180,10 @@ $groups = @(
     [pscustomobject]@{ Name = 'Driver of the setup disk'; From = $def.BootDriverFrom; Files = $def.BootDriver; Optional = $true; Medium = $null }
 }) + @($def.Archive | ForEach-Object { [pscustomobject]@{ Name = $_.Name; From = $_.From; Files = $_.Files; Optional = [bool]$_.Optional; Medium = $_.Medium } })
 
+if ($def.BootSector) {
+    $groups += [pscustomobject]@{ Name = 'Boot sector'; From = $def.SystemFrom; Files = @($def.BootSector); Optional = $false; Medium = $null }
+}
+
 # --- images in -Source ----------------------------------------------------------
 
 # CD images (*.iso), floppy images (*.img, *.ima) and 7-Zip archives of them
@@ -214,7 +218,7 @@ function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
     $d = Join-Path $into (('{0}-{1}' -f ($f.BaseName -replace '[^\w.-]', '_'), $len))
     # .done holds the folders unpacked from a CD (also in a .7z): unpack again
     # when they change
-    $what = if ($f.Extension -in '.iso', '.7z') { $cdPatterns -join "`n" } else { '' }
+    $what = 'v2' + $(if ($f.Extension -in '.iso', '.7z', '.zip') { $cdPatterns -join "`n" } else { '' })
     $done = Join-Path $d '.done'
     if ((Test-Path -LiteralPath $done) -and ([IO.File]::ReadAllText($done) -eq $what)) { return $d }
     if (Test-Path -LiteralPath $d) { Remove-Item -LiteralPath $d -Recurse -Force }
@@ -233,9 +237,19 @@ function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
                 Remove-Item -Recurse -Force
         }
         '.iso' { $log = & $7z x -y -ssc- "-o$d" $f.FullName $cdPatterns 2>&1 }
+        '.zip' { $log = & $7z x -y -ssc- "-o$d" $f.FullName $cdPatterns 2>&1 }
         default { $log = & $7z x -y "-o$d" $f.FullName 2>&1 }
     }
     if ($LASTEXITCODE) { throw "7-Zip failed on $($f.FullName):`n$($log -join "`n")" }
+    if ($f.Extension -in '.img', '.ima') {
+        $stream = $f.OpenRead()
+        try {
+            $sector = New-Object byte[] 512
+            if ($stream.Read($sector, 0, 512) -eq 512 -and $sector[510] -eq 0x55 -and $sector[511] -eq 0xAA) {
+                [IO.File]::WriteAllBytes((Join-Path $d 'BOOTSECT.BIN'), $sector)
+            }
+        } finally { $stream.Dispose() }
+    }
     [IO.File]::WriteAllText($done, $what)
     return $d
 }
@@ -243,7 +257,7 @@ function Expand-SourceImage([IO.FileInfo]$f, [string]$into) {
 # all files below $Source (and of its unpacked images) by name
 $index = @{}
 function Add-SourceFiles([IO.FileInfo[]]$files) {
-    foreach ($i in @($files | Where-Object { $_.Extension -in '.7z', '.iso', '.img', '.ima' })) {
+    foreach ($i in @($files | Where-Object { $_.Extension -in '.7z', '.zip', '.iso', '.img', '.ima' })) {
         New-Item -ItemType Directory -Force -Path $Cache | Out-Null
         $files += @(Get-ChildItem -LiteralPath (Expand-SourceImage $i $Cache) -Recurse -File)
     }
@@ -357,6 +371,40 @@ if ($Download) {
 }
 $haveSource = [bool]($Source -or $Download)
 
+# FTCOMP bundles are expanded by IBM's own UNPACK2 under DOSBox.
+# Sources already unpacked with UNPACK2 need neither DOSBox nor bundles.
+if ($def.IbmBundles -and $haveSource) {
+    foreach ($bundle in $def.IbmBundles) {
+        $packed = Find-SourceFile $bundle
+        if (-not $packed) { continue }
+        $hash = (Get-FileHash -LiteralPath $packed.FullName -Algorithm SHA256).Hash
+        $dest = Join-Path $Cache "ibm-$bundle-$hash"
+        $done = Join-Path $dest 'PCDOS.OK'
+        if (-not (Test-Path -LiteralPath $done)) {
+            $unpack = Find-SourceFile 'UNPACK2.EXE'
+            $dosbox = Get-Command dosbox -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $unpack -or -not $dosbox) { throw 'PC-DOS bundles need DOSBox on PATH and UNPACK2.EXE from disk 1, or already unpacked files.' }
+            New-Item -ItemType Directory -Force -Path $dest | Out-Null
+            Copy-Item -LiteralPath $packed.FullName -Destination (Join-Path $dest $bundle)
+            Copy-Item -LiteralPath $unpack.FullName -Destination (Join-Path $dest 'UNPACK2.EXE')
+            $bat = "@echo off`r`nunpack2 $bundle files /c /p >unpack.log`r`nif errorlevel 1 goto end`r`necho OK>PCDOS.OK`r`n:end`r`nexit`r`n"
+            [IO.File]::WriteAllText((Join-Path $dest 'UNPACK.BAT'), $bat, [Text.Encoding]::ASCII)
+            [IO.File]::WriteAllText((Join-Path $dest 'dosbox.conf'), "[sdl]`noutput=surface`n[midi]`nmpu401=none`n[autoexec]`n", [Text.Encoding]::ASCII)
+            Write-Host "Unpacking IBM bundle $bundle ..."
+            $oldVideo, $oldAudio = $env:SDL_VIDEODRIVER, $env:SDL_AUDIODRIVER
+            try {
+                $env:SDL_VIDEODRIVER = 'dummy'; $env:SDL_AUDIODRIVER = 'dummy'
+                $log = & $dosbox.Source -conf (Join-Path $dest 'dosbox.conf') -noconsole -c 'cycles max' -c "mount c `"$dest`"" -c 'c:' -c 'unpack.bat' 2>&1
+                if ($LASTEXITCODE -or -not (Test-Path -LiteralPath $done)) { throw "UNPACK2 failed for $bundle. See $dest/unpack.log`n$log" }
+            } finally { $env:SDL_VIDEODRIVER = $oldVideo; $env:SDL_AUDIODRIVER = $oldAudio }
+        }
+        $expanded = Get-ChildItem -LiteralPath $dest -Directory | Where-Object { $_.Name -eq 'FILES' } | Select-Object -First 1
+        if (-not $expanded) { throw "UNPACK2 produced no files for $bundle; remove $dest and retry." }
+        Add-SourceFiles @(Get-ChildItem -LiteralPath $expanded.FullName -Recurse -File)
+    }
+}
+
+
 function Test-Spec($s) {
     if ($s.Medium) { return [bool](Find-MediumFile $s) }
     return [bool](Find-SourceFile $s.Path)
@@ -390,7 +438,7 @@ if ($List) {
     if ($def.Media) {
         Write-Host "`nCDs: put their images (*.iso, *.7z) into -Source, or copy them (or the folders named above), keeping the folders:"
         foreach ($k in $def.Media.Keys) { Write-Host ("  {0}: {1} (found by {2})" -f $k, $def.Media[$k].Name, $def.Media[$k].Find) }
-        Write-Host "-Download fetches the missing ones from WinWorld (sets\$Set\downloads.txt)."
+        Write-Host "-Download fetches the missing media (sets\$Set\downloads.txt)."
     }
     return
 }
@@ -404,7 +452,7 @@ if ($Iso) {
     foreach ($x in $Extra) { foreach ($k in (Read-ExtraFiles $x).Keys) { if ($k -in 'AHCIASPI.SYS', 'ASPICDA.SYS', 'ASPICD.SYS') { $hasAspi[$k] = 1 } } }
     $aspiCd = $hasAspi.ContainsKey('AHCIASPI.SYS') -and ($hasAspi.ContainsKey('ASPICDA.SYS') -or $hasAspi.ContainsKey('ASPICD.SYS'))
     if (-not $CdDriver -and -not $aspiCd) {
-        $driver = Find-SourceFile 'OAKCDROM.SYS'
+        $driver = if ($def.CdDriver) { Find-MediumFile (Get-Spec $def.CdDriver $null) } else { Find-SourceFile 'OAKCDROM.SYS' }
         if ($driver) { $CdDriver = $driver.FullName }
     }
     if (-not $aspiCd -and (-not $CdDriver -or -not (Test-Path -LiteralPath $CdDriver -PathType Leaf))) {
@@ -436,7 +484,12 @@ function Read-Spec($s) {
     if ($s.Member) { $f = Expand-CabFile $f $s.Member }
     return [pscustomobject]@{ Name = $s.Leaf; Data = [IO.File]::ReadAllBytes($f.FullName); Time = $f.LastWriteTime }
 }
-function Read-SourceFile([string]$entry) { return Read-Spec (Get-Spec $entry $null) }
+function Read-SourceFile([string]$entry) {
+    $spec = Get-Spec $entry $null
+    $f = Read-Spec $spec
+    if ($spec.As) { $f.Name = $spec.As.ToUpperInvariant() }
+    return $f
+}
 
 # expand SZDD/KWAJ files; name from the file or the set's tables
 function Expand-File($f) {
@@ -453,6 +506,17 @@ function Expand-File($f) {
     return [pscustomobject]@{ Name = $name.ToUpperInvariant(); Data = $data; Time = $f.Time }
 }
 
+# Every translation is checked against the expected source bytes. Space padding
+# preserves DOS dollar terminators and the counted message tables of FORMAT32.
+if ($def.Translations) {
+    foreach ($line in Get-Content -LiteralPath (Join-Path $setDir $def.Translations) -Encoding UTF8) {
+        if ($line -match '^\s*(#|$)') { continue }
+        $fields = $line -split "`t"
+        if ($fields.Count -ne 4) { throw "Invalid translation: $line" }
+        $def.Patches += @{ Files = @($fields[0] -split ','); OldText = $fields[1]; NewText = $fields[2]; Count = [int]$fields[3]; SpacePad = $true; Required = $true }
+    }
+}
+
 # bytes of a patch: Old/New in hex or OldText/NewText in code page 850
 function Get-PatchBytes($p, [string]$key) {
     if ($p.ContainsKey("${key}Text")) { return [byte[]]$cp850.GetBytes($p["${key}Text"]) }
@@ -467,21 +531,37 @@ function Set-Patch([string]$name, $f) {
     if ($def.Texts -and $def.Texts[$name]) {
         $f = [pscustomobject]@{ Name = $f.Name; Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir $def.Texts[$name]))); Time = $f.Time }
     }
+    if ($def.Pklite -and $def.Pklite[$name]) {
+        $pk = $def.Pklite[$name]
+        $hash = [Security.Cryptography.SHA256]::Create()
+        try { $sha = ([BitConverter]::ToString($hash.ComputeHash($f.Data))).Replace('-', '').ToLowerInvariant() }
+        finally { $hash.Dispose() }
+        if ($sha -ne $pk.Sha256) { throw "${name}: unexpected PKLITE source version" }
+        $f.Data = [GeosOne.Gdi.PkLiteSmall]::Expand($f.Data, $pk.Start, $pk.Size)
+    }
+    $original = [byte[]]$f.Data.Clone()
     foreach ($p in @($def.Patches)) {
         if ($p.Files -notcontains $name) { continue }
         $old = Get-PatchBytes $p 'Old'
         $new = Get-PatchBytes $p 'New'
-        if ($new.Length -lt $old.Length) { $new = [byte[]]($new + (New-Object byte[] ($old.Length - $new.Length))) }
+        if ($p.SpacePad -and $new.Length -gt $old.Length) { throw "$name patch is longer than its original bytes: $($p.NewText)" }
+        if ($new.Length -lt $old.Length) {
+            $padding = New-Object byte[] ($old.Length - $new.Length)
+            if ($p.SpacePad) { for ($j = 0; $j -lt $padding.Length; $j++) { $padding[$j] = 32 } }
+            $new = [byte[]]($new + $padding)
+        }
         $what = if ($p.ContainsKey('OldText')) { "'$($p.OldText)'" } else { $p.Old }
+        $searchData = if ($p.SpacePad) { $original } else { $f.Data }
         $hits = @()
         $from, $to = if ($p.ContainsKey('At')) { $p.At, $p.At } else { 0, ($f.Data.Length - $old.Length) }
         for ($i = $from; $i -le $to; $i++) {
             $j = 0
-            while ($j -lt $old.Length -and $i + $j -lt $f.Data.Length -and $f.Data[$i + $j] -eq $old[$j]) { $j++ }
+            while ($j -lt $old.Length -and $i + $j -lt $f.Data.Length -and $searchData[$i + $j] -eq $old[$j]) { $j++ }
             if ($j -eq $old.Length) { $hits += $i }
         }
         $want = if ($p.ContainsKey('Count')) { $p.Count } else { 1 }
         if ($hits.Count -ne $want) {
+            if ($p.Required) { throw "$name required patch mismatch: $what (found $($hits.Count), expected $want)" }
             if ($p.ContainsKey('At')) { Write-Warning ("{0}: {1} not at 0x{2:X}, not patched" -f $name, $what, $p.At) }
             else { Write-Warning ("{0}: {1} found {2} times, not patched" -f $name, $what, $hits.Count) }
             continue
@@ -579,13 +659,14 @@ $licenseFile = if ($Eula) { $Eula } else { Join-Path $setDir 'LIZENZ.TXT' }
 
 $serial = [uint32](Get-Random -Maximum ([int]::MaxValue))
 $now = Get-Date
-# the boot sector loads IO.SYS (FreeDOS OEM boot sector for MS-DOS 7.x)
-$disk1 = [GeosOne.Gdi.Fat12Image]::new([GeosOne.Gdi.BootSectors]::Win9xFat12, "$($def.Label) 1", $serial)
+# MS-DOS uses our IO.SYS loader; PC-DOS uses the sector from its own media.
+$bootSector = if ($def.BootSector) { (Read-SourceFile $def.BootSector).Data } else { [GeosOne.Gdi.BootSectors]::Win9xFat12 }
+$disk1 = [GeosOne.Gdi.Fat12Image]::new($bootSector, "$($def.Label) 1", $serial)
 $disk1Files = [ordered]@{}
 foreach ($n in $def.System) {
     $f = if ($made.ContainsKey($n)) { $made[$n] } else { Read-SourceFile $n }
     $f = Set-Patch $f.Name $f
-    $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = $(if ($f.Name -in 'IO.SYS', 'MSDOS.SYS') { 7 } else { 0x20 }) }
+    $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = $(if ($f.Name -in 'IO.SYS', 'MSDOS.SYS', 'IBMBIO.COM', 'IBMDOS.COM') { 7 } else { 0x20 }) }
 }
 $kb = $def.Keyboard
 $disk1Files['CONFIG.SYS'] = @{ Data = (ConvertTo-DosText "FILES=30`nBUFFERS=20`nLASTDRIVE=Z"); Time = $now; Attr = 0x20 }
@@ -622,6 +703,25 @@ foreach ($n in @($def.BootFiles) + @(if ($bootDriver) { $def.BootDriver })) {
     $f = Read-SourceFile $n
     $f = Set-Patch $f.Name $f
     $disk1Files[$f.Name] = @{ Data = $f.Data; Time = $f.Time; Attr = 0x20 }
+}
+foreach ($n in $def.BootTexts.Keys) {
+    $disk1Files[$n] = @{ Data = (ConvertTo-DosText (Read-TextFile (Join-Path $setDir $def.BootTexts[$n]))); Time = $now; Attr = 0x20 }
+}
+foreach ($n in $def.BootAsm.Keys) {
+    $nasm = Get-Command nasm -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $nasm) { throw 'nasm is needed to build the PC-DOS system transfer helper.' }
+    New-Item -ItemType Directory -Force -Path $cabDir | Out-Null
+    $binary = Join-Path $cabDir $n
+    & $nasm.Source -f bin ('-I' + $setDir + [IO.Path]::DirectorySeparatorChar) -o $binary (Join-Path $setDir $def.BootAsm[$n])
+    if ($LASTEXITCODE) { throw "nasm failed for $n" }
+    $disk1Files[$n] = @{ Data = [IO.File]::ReadAllBytes($binary); Time = $now; Attr = 0x20 }
+}
+if ($def.Fat32BootTemplate) {
+    $bytes = $disk1Files[$def.Fat32BootTemplate].Data
+    $text = [Text.Encoding]::ASCII.GetString($bytes)
+    $at = $text.IndexOf('IBM  7.1') - 3
+    if ($at -lt 0 -or $bytes[$at] -ne 0xEB -or $bytes[$at+504] -ne 0x55 -or $bytes[$at+505] -ne 0xAA) { throw 'IBM FAT32 boot template not found in FORMAT32.COM.' }
+    $disk1Files['BOOT32.BIN'] = @{ Data = [byte[]]($bytes[$at..($at+51)] + (New-Object byte[] 6) + $bytes[($at+52)..($at+505)]); Time = $now; Attr = 0x20 }
 }
 foreach ($n in $disk1Files.Keys) { $disk1.AddFile($n, $disk1Files[$n].Data, $disk1Files[$n].Time, [byte]$disk1Files[$n].Attr) }
 
@@ -677,11 +777,13 @@ if ($Dirs) {
 }
 if ($Iso) {
     $mscdex = $archive | Where-Object { $_.Name -eq 'DOS\MSCDEX.EXE' } | Select-Object -First 1
-    if (-not $mscdex) { throw 'The disk set archive has no DOS\MSCDEX.EXE for CD boot.' }
     $mscdexPath = Join-Path $cabDir 'MSCDEX.EXE'
     New-Item -ItemType Directory -Path $cabDir -Force | Out-Null
-    [IO.File]::WriteAllBytes($mscdexPath, $mscdex.Data)
-    $isoArgs = @{ Disks = $Out; Mscdex = $mscdexPath; Extra = $Extra }
+    $isoArgs = @{ Disks = $Out; Extra = $Extra }
+    if ($mscdex) {
+        [IO.File]::WriteAllBytes($mscdexPath, $mscdex.Data)
+        $isoArgs.Mscdex = $mscdexPath
+    }
     if ($CdDriver) { $isoArgs.CdDriver = $CdDriver }
     & (Join-Path $PSScriptRoot 'tools/mkdosiso.ps1') @isoArgs
 }
