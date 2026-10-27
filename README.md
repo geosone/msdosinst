@@ -1,18 +1,4 @@
-# msdosinst - MS-DOS and German PC-DOS installation disk sets
-
-A German **PC-DOS 7.1** set is also available: PC-DOS 2000 German programs
-with the FAT32 kernel from IBM ServerGuide Scripting Toolkit DOS 1.3.07.
-It has a German interactive FDISK menu and keeps the original German
-FDISK and FORMAT as `FDISK16.COM` and `FORMAT16.COM`.
-
-```powershell
-./mkdosset.ps1 -Set pcdos71de -Download -Out ./out/pcdos71de
-./mkdosset.ps1 -Set pcdos71de -Download -Out ./out/pcdos71de -Iso -Extra AHCIASPI.IMG
-```
-
-See [PC-DOS instructions](sets/pcdos71de/README.md) for sources,
-dependencies, compatibility patches and [tests](sets/pcdos71de/TESTED.md).
-The default set remains `msdos71de`; the MS-DOS instructions follow below.
+# msdosinst - MS-DOS installation disk sets
 
 `mkdosset.ps1` builds a set of bootable 1.44 MB floppy images that install MS-DOS 7.1 with the [GeosOne Dual Installer](https://github.com/geosone/gdi):
 
